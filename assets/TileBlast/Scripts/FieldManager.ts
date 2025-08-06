@@ -1,3 +1,4 @@
+import TileField from "./Graphics/TileField";
 import Tile from "./Tile";
 import TileGroup from "./TileGroup";
 
@@ -6,13 +7,16 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class FieldManager extends cc.Component {
   @property(cc.Integer)
-  private width: number = 8;
+  private numColumns: number = 8;
 
   @property(cc.Integer)
-  private height: number = 7;
+  private numRows: number = 7;
 
   @property([cc.String])
   private types: string[] = ["red", "blue", "green", "yellow"];
+
+  @property(TileField)
+  private tileField: TileField = null;
 
   private fieldTiles: Tile[] = [];
 
@@ -22,6 +26,9 @@ export default class FieldManager extends cc.Component {
     this.createField();
     this.assignGroups();
     this.printFieldGrid();
+
+    this.tileField.generateTiles(this.numColumns, this.numRows);
+    this.tileField.drawTiles(this.fieldTiles);
   }
 
   /**
@@ -32,18 +39,18 @@ export default class FieldManager extends cc.Component {
     let styleArr: string[] = [];
     const pad = (val: string | number, len: number) =>
       String(val).padStart(len, " ");
-    for (let row = 0; row < this.height; row++) {
+    for (let row = 0; row < this.numRows; row++) {
       let rowStr = "";
       let rowStyles: string[] = [];
-      for (let col = 0; col < this.width; col++) {
+      for (let col = 0; col < this.numColumns; col++) {
         const tile = this.getTileAt(row, col);
         if (tile) {
-          const tileId = tile.id != null ? pad(tile.id, 2) : " -";
-          const groupId = tile.group ? pad(tile.group.id, 2) : " -";
+          // const tileId = tile.id != null ? pad(tile.id, 2) : " -";
+          // const groupId = tile.group ? pad(tile.group.id, 2) : " -";
           const color = tile.type || "gray";
-          rowStr += `%c[${tileId}:${groupId}] `;
+          rowStr += `%c[${tile.position.x}:${tile.position.y}] `;
           rowStyles.push(
-            `background:${color};color:white;padding:1px 4px;border-radius:3px;font-family:monospace`
+            `background:${color};color:gray;padding:1px 4px;border-radius:3px;font-family:monospace`
           );
         } else {
           rowStr += "%c[ - : - ] ";
@@ -62,8 +69,8 @@ export default class FieldManager extends cc.Component {
   }
 
   private createField(): void {
-    for (let row = 0; row < this.height; row++) {
-      for (let col = 0; col < this.width; col++) {
+    for (let row = 0; row < this.numRows; row++) {
+      for (let col = 0; col < this.numColumns; col++) {
         const type = this.types[Math.floor(Math.random() * this.types.length)];
         const tile = new Tile(this.fieldTiles.length, row, col, type);
         this.fieldTiles.push(tile);
@@ -130,10 +137,10 @@ export default class FieldManager extends cc.Component {
   }
 
   private getTileAt(row: number, col: number): Tile | null {
-    const index = row * this.width + col;
-    if (index < 0 || index >= this.fieldTiles.length) {
+    if (row < 0 || row >= this.numRows || col < 0 || col >= this.numColumns) {
       return null;
     }
+    const index = row * this.numColumns + col;
     return this.fieldTiles[index] || null;
   }
 }
