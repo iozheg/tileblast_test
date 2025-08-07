@@ -27,8 +27,13 @@ export default class TileField extends cc.Component {
 
   // onLoad () {}
 
-  start() {
-    console.log("container size", this.tileContainer.getContentSize());
+  start() {}
+
+  protected onDestroy(): void {
+    this.tileObjects.forEach((tile) => {
+      tile.node.off(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
+    });
+    this.tileObjects = [];
   }
 
   generateTiles(numColumns: number, numRows: number) {
@@ -37,7 +42,9 @@ export default class TileField extends cc.Component {
     for (let row = 0; row < numRows; row++) {
       for (let col = 0; col < numColumns; col++) {
         const tileNode = cc.instantiate(this.tilePrefab);
+        tileNode.on(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
         this.tileContainer.addChild(tileNode);
+
         const tileController = tileNode.getComponent(TileController);
         const xOffset = col - Math.floor(numColumns / 2);
         tileController.setSizeAndPosition(
@@ -62,5 +69,10 @@ export default class TileField extends cc.Component {
         tile.group.id
       );
     });
+  }
+
+  private onTileClick(event: cc.Event.EventTouch): void {
+    const tileId = event.currentTarget.getComponent(TileController).tileId;
+    this.node.emit("tile-clicked", tileId);
   }
 }

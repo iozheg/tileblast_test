@@ -29,6 +29,8 @@ export default class FieldManager extends cc.Component {
 
     this.tileField.generateTiles(this.numColumns, this.numRows);
     this.tileField.drawTiles(this.fieldTiles);
+
+    this.tileField.node.on("tile-clicked", this.onTileClick, this);
   }
 
   /**
@@ -142,5 +144,14 @@ export default class FieldManager extends cc.Component {
     }
     const index = row * this.numColumns + col;
     return this.fieldTiles[index] || null;
+  }
+
+  private onTileClick(tileId: number): void {
+    const tile = this.fieldTiles.find((t) => t.id === tileId);
+    if (tile?.group.tileCount > 1) {
+      console.log(
+        `Tile clicked: ID=${tile.id}, Type=${tile.type}, Group ID=${tile.group.id}`
+      );
+    }
   }
 }

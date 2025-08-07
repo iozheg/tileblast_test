@@ -6,5 +6,5 @@ export default class TileType {
   type: string = "";
 
   @property(cc.SpriteFrame)
-  sprite: cc.SpriteFrame;
+  sprite: cc.SpriteFrame = null;
 }

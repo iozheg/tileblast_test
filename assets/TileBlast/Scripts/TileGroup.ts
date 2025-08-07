@@ -7,6 +7,10 @@ export default class TileGroup {
 
   private tiles: Tile[] = [];
 
+  get tileCount(): number {
+    return this.tiles.length;
+  }
+
   constructor(id: number) {
     this.id = id;
   }

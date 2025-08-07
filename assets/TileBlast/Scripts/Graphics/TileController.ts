@@ -8,10 +8,16 @@ export default class NewClass extends cc.Component {
   @property(cc.Sprite)
   private tile: cc.Sprite = null;
 
-  private id: number = 0;
+  private _tileId: number = 0;
+
+  get tileId(): number {
+    return this._tileId;
+  }
+
+  start() {}
 
   setup(id: number, sprite: cc.SpriteFrame, groupId: number): void {
-    this.id = id;
+    this._tileId = id;
     this.tile.spriteFrame = sprite;
     this.groupIdLabel.string = `${groupId}`;
   }
