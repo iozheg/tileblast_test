@@ -1,52 +1,69 @@
 import TileModel from "../Tile/TileModel";
 import TileGroupModel from "../Tile/TileGroupModel";
 import { Point } from "../utils/Point";
+import PooledFactory from "../utils/PooledFactory";
 
 export default class BoardModel {
-  private tiles: TileModel[] = [];
+  private grid: TileModel[] = [];
   private tileGroups: TileGroupModel[] = [];
   private tileTypes: string[] = [];
   private numColumns: number;
   private numRows: number;
 
+  private tileModelFactory: PooledFactory<TileModel>;
+
   get fieldTiles(): TileModel[] {
-    return this.tiles;
+    return this.grid;
   }
 
   constructor(numColumns: number, numRows: number, tileTypes: string[]) {
     this.numColumns = numColumns;
     this.numRows = numRows;
     this.tileTypes = tileTypes;
-  }
 
-  public getTileAt(row: number, col: number): TileModel | null {
-    const index = this.getTileIndexAt(row, col);
-    return index !== -1 ? this.tiles[index] : null;
+    this.tileModelFactory = new PooledFactory(TileModel, numColumns * numRows);
+
+    this.generateGrid();
   }
 
   public getTileById(id: number): TileModel | null {
-    return this.tiles.find((tile) => tile && tile.id === id) || null;
+    return this.grid.find((tile) => tile && tile.id === id) || null;
   }
 
-  public generateTiles(): void {
-    this.tiles = [];
-    for (let row = 0; row < this.numRows; row++) {
-      for (let col = 0; col < this.numColumns; col++) {
-        const type =
-          this.tileTypes[Math.floor(Math.random() * this.tileTypes.length)];
-        const tile = new TileModel(this.tiles.length, row, col, type);
-        this.tiles.push(tile);
+  public removeGroupTiles(group: TileGroupModel): void {
+    for (let i = 0; i < this.grid.length; i++) {
+      if (this.grid[i] && this.grid[i].group === group) {
+        this.tileModelFactory.releaseInstance(this.grid[i]);
+        this.grid[i] = null;
       }
     }
+
+    this.updateTilesPosition();
+    this.fillEmptyTiles();
+    this.assignGroups();
   }
 
-  public assignGroups(): void {
-    for (const tile of this.tiles) {
+  private generateGrid(): void {
+    this.grid = [];
+    for (let row = 0; row < this.numRows; row++) {
+      for (let col = 0; col < this.numColumns; col++) {
+        const tile = this.tileModelFactory.create();
+        tile.id = this.grid.length;
+        tile.init(row, col, this.getRandomTileType());
+        this.grid.push(tile);
+      }
+    }
+
+    this.assignGroups();
+  }
+
+  private assignGroups(): void {
+    for (const tile of this.grid) {
       tile && (tile.group = null);
     }
     this.tileGroups = [];
 
-    for (const tile of this.tiles) {
+    for (const tile of this.grid) {
       if (tile && !tile.group) {
         const group = new TileGroupModel(this.tileGroups.length);
         this.tileGroups.push(group);
@@ -55,29 +72,33 @@ export default class BoardModel {
     }
   }
 
-  public removeGroupTiles(group: TileGroupModel): TileModel[] {
-    for (let i = 0; i < this.tiles.length; i++) {
-      if (this.tiles[i] && this.tiles[i].group === group) {
-        this.tiles[i] = null;
-      }
-    }
-
-    return group.tiles;
-  }
-
-  public updateTilesPosition(): void {
-    for (let i = this.tiles.length - 1; i >= 0; i--) {
-      if (!this.tiles[i]) {
+  private updateTilesPosition(): void {
+    for (let i = this.grid.length - 1; i >= 0; i--) {
+      if (!this.grid[i]) {
         const position = {
           x: i % this.numColumns,
           y: Math.floor(i / this.numColumns),
         };
         const aboveTileIndex = this.getFirstAboveTileIndex(position);
         if (aboveTileIndex !== -1) {
-          this.tiles[i] = this.tiles[aboveTileIndex];
-          this.tiles[aboveTileIndex] = null;
-          this.tiles[i].position = position;
+          this.grid[i] = this.grid[aboveTileIndex];
+          this.grid[aboveTileIndex] = null;
+          this.grid[i].position = position;
         }
+      }
+    }
+  }
+
+  private fillEmptyTiles(): void {
+    for (let i = 0; i < this.grid.length; i++) {
+      if (!this.grid[i]) {
+        this.grid[i] = this.tileModelFactory.create();
+        const position = {
+          x: i % this.numColumns,
+          y: Math.floor(i / this.numColumns),
+        };
+
+        this.grid[i].init(position.y, position.x, this.getRandomTileType());
       }
     }
   }
@@ -133,11 +154,16 @@ export default class BoardModel {
   private getFirstAboveTileIndex(position: Point): number {
     for (let row = position.y - 1; row >= 0; row--) {
       const aboveTileIndex = this.getTileIndexAt(row, position.x);
-      if (aboveTileIndex !== -1 && this.tiles[aboveTileIndex]) {
+      if (aboveTileIndex !== -1 && this.grid[aboveTileIndex]) {
         return aboveTileIndex;
       }
     }
     return -1;
+  }
+
+  private getTileAt(row: number, col: number): TileModel | null {
+    const index = this.getTileIndexAt(row, col);
+    return index !== -1 ? this.grid[index] : null;
   }
 
   private getTileIndexAt(row: number, col: number): number {
@@ -145,5 +171,9 @@ export default class BoardModel {
       return -1;
     }
     return row * this.numColumns + col;
+  }
+
+  private getRandomTileType(): string {
+    return this.tileTypes[Math.floor(Math.random() * this.tileTypes.length)];
   }
 }

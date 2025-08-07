@@ -2,7 +2,7 @@ import { Point } from "../utils/Point";
 import TileGroupModel from "./TileGroupModel";
 
 export default class TileModel {
-  readonly id: number;
+  id: number;
 
   position: Point;
 
@@ -10,8 +10,9 @@ export default class TileModel {
 
   group: TileGroupModel | null = null;
 
-  constructor(id: number, row: number, col: number, type: string) {
-    this.id = id;
+  constructor() {}
+
+  init(row: number, col: number, type: string): void {
     this.position = { x: col, y: row };
     this.type = type;
   }

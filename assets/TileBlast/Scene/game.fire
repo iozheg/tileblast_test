@@ -333,14 +333,14 @@
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0.5,
+      "x": 0,
       "y": 1
     },
     "_trs": {
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
+        -320,
         305,
         0,
         0,
@@ -405,7 +405,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
+        320,
         70,
         0,
         0,
@@ -658,7 +658,7 @@
     },
     "_enabled": true,
     "numColumns": 9,
-    "numRows": 7,
+    "numRows": 10,
     "tileContainer": {
       "__id__": 6
     },

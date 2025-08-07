@@ -7,27 +7,40 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class TileController extends cc.Component {
   @property(TileView)
-  private tileView: TileView;
+  private tileView: TileView = null;
 
   tileId: number;
+
+  private positionOffset: Point = { x: 0, y: 0 };
 
   setup(model: TileModel, sprite: cc.SpriteFrame): void {
     this.tileId = model.id;
     this.tileView.setup(sprite, model.group.id);
   }
 
-  setSizeAndPosition(size: Point, position: Point): void {
-    // this.node.setPosition(position.x, position.y);
-    this.tileView.moveTo(position);
+  setSize(size: Point): void {
     this.node.setContentSize(size.x, size.y);
+    this.positionOffset = {
+      x: size.x / 2,
+      y: size.y / 2,
+    };
   }
 
-  setPosition(position: Point): void {
-    this.tileView.moveTo(position);
+  setPosition(position: Point, immediate: boolean = false): void {
+    const scenePosition = {
+      x: position.x * this.node.width + this.positionOffset.x,
+      y: -position.y * this.node.height,
+    };
+
+    if (immediate) {
+      this.node.setPosition(scenePosition.x, scenePosition.y);
+    } else {
+      this.tileView.moveTo(scenePosition);
+    }
   }
 
-  destroyTile(): void {
-    this.node.destroy();
+  async destroyTile(): Promise<void> {
+    await this.tileView.remove();
   }
 
   // debug

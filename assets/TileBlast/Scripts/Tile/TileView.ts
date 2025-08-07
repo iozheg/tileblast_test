@@ -15,6 +15,7 @@ export default class TileView extends cc.Component {
   setup(sprite: cc.SpriteFrame, groupId: number): void {
     this.sprite.spriteFrame = sprite;
     this.groupIdLabel.string = `${groupId}`;
+    this.node.scale = 1;
   }
 
   moveTo(position: Point): void {
@@ -29,6 +30,17 @@ export default class TileView extends cc.Component {
         this.tween = null;
       })
       .start();
+  }
+
+  async remove(): Promise<void> {
+    return new Promise((resolve) => {
+      cc.tween(this.node)
+        .to(0.2, { scale: 0 })
+        .call(() => {
+          resolve();
+        })
+        .start();
+    });
   }
 
   //debug
