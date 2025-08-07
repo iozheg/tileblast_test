@@ -1,5 +1,6 @@
 import TileModel from "../Tile/TileModel";
 import TileGroupModel from "../Tile/TileGroupModel";
+import { Point } from "../utils/Point";
 
 export default class BoardModel {
   private tiles: TileModel[] = [];
@@ -19,11 +20,8 @@ export default class BoardModel {
   }
 
   public getTileAt(row: number, col: number): TileModel | null {
-    if (row < 0 || row >= this.numRows || col < 0 || col >= this.numColumns) {
-      return null;
-    }
-    const index = row * this.numColumns + col;
-    return this.tiles[index] || null;
+    const index = this.getTileIndexAt(row, col);
+    return index !== -1 ? this.tiles[index] : null;
   }
 
   public getTileById(id: number): TileModel | null {
@@ -44,12 +42,12 @@ export default class BoardModel {
 
   public assignGroups(): void {
     for (const tile of this.tiles) {
-      tile.group = null;
+      tile && (tile.group = null);
     }
     this.tileGroups = [];
 
     for (const tile of this.tiles) {
-      if (!tile.group) {
+      if (tile && !tile.group) {
         const group = new TileGroupModel(this.tileGroups.length);
         this.tileGroups.push(group);
         this.fillGroup(group, tile);
@@ -59,12 +57,29 @@ export default class BoardModel {
 
   public removeGroupTiles(group: TileGroupModel): TileModel[] {
     for (let i = 0; i < this.tiles.length; i++) {
-      if (group.tiles.includes(this.tiles[i])) {
+      if (this.tiles[i] && this.tiles[i].group === group) {
         this.tiles[i] = null;
       }
     }
 
     return group.tiles;
+  }
+
+  public updateTilesPosition(): void {
+    for (let i = this.tiles.length - 1; i >= 0; i--) {
+      if (!this.tiles[i]) {
+        const position = {
+          x: i % this.numColumns,
+          y: Math.floor(i / this.numColumns),
+        };
+        const aboveTileIndex = this.getFirstAboveTileIndex(position);
+        if (aboveTileIndex !== -1) {
+          this.tiles[i] = this.tiles[aboveTileIndex];
+          this.tiles[aboveTileIndex] = null;
+          this.tiles[i].position = position;
+        }
+      }
+    }
   }
 
   private fillGroup(group: TileGroupModel, tile: TileModel): void {
@@ -113,5 +128,22 @@ export default class BoardModel {
       }
     }
     return neighbors;
+  }
+
+  private getFirstAboveTileIndex(position: Point): number {
+    for (let row = position.y - 1; row >= 0; row--) {
+      const aboveTileIndex = this.getTileIndexAt(row, position.x);
+      if (aboveTileIndex !== -1 && this.tiles[aboveTileIndex]) {
+        return aboveTileIndex;
+      }
+    }
+    return -1;
+  }
+
+  private getTileIndexAt(row: number, col: number): number {
+    if (row < 0 || row >= this.numRows || col < 0 || col >= this.numColumns) {
+      return -1;
+    }
+    return row * this.numColumns + col;
   }
 }

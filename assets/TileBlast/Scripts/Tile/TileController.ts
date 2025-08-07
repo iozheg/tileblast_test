@@ -1,3 +1,4 @@
+import { Point } from "../utils/Point";
 import TileModel from "./TileModel";
 import TileView from "./TileView";
 
@@ -16,16 +17,21 @@ export default class TileController extends cc.Component {
   }
 
   setSizeAndPosition(size: Point, position: Point): void {
-    this.node.setPosition(position.x, position.y);
+    // this.node.setPosition(position.x, position.y);
+    this.tileView.moveTo(position);
     this.node.setContentSize(size.x, size.y);
+  }
+
+  setPosition(position: Point): void {
+    this.tileView.moveTo(position);
   }
 
   destroyTile(): void {
     this.node.destroy();
   }
-}
 
-type Point = {
-  x: number;
-  y: number;
-};
+  // debug
+  setDebugInfo(id: number, groupId: number): void {
+    this.tileView.setDebugInfo(id, groupId);
+  }
+}

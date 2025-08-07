@@ -1,9 +1,10 @@
+import { Point } from "../utils/Point";
 import TileGroupModel from "./TileGroupModel";
 
 export default class TileModel {
   readonly id: number;
 
-  position: cc.Vec2;
+  position: Point;
 
   type: string;
 
@@ -11,7 +12,7 @@ export default class TileModel {
 
   constructor(id: number, row: number, col: number, type: string) {
     this.id = id;
-    this.position = new cc.Vec2(col, row);
+    this.position = { x: col, y: row };
     this.type = type;
   }
 }

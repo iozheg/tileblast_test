@@ -73,8 +73,26 @@ export default class BoardController extends cc.Component {
     )?.sprite;
 
     tileController.setup(tileModel, spriteFrame);
+    tileController.setDebugInfo(tileModel.id, tileModel.group.id);
 
     return tileController;
+  }
+
+  private updateTiles(): void {
+    this.BoardModel.updateTilesPosition();
+    this.BoardModel.assignGroups();
+
+    for (const tileModel of this.BoardModel.fieldTiles) {
+      const tileController = this.modelToController.get(tileModel);
+      if (tileController) {
+        const xOffset = tileModel.position.x - Math.floor(this.numColumns / 2);
+        tileController.setPosition({
+          x: xOffset * tileController.node.width,
+          y: -tileModel.position.y * tileController.node.height,
+        });
+        tileController.setDebugInfo(tileModel.id, tileModel.group.id);
+      }
+    }
   }
 
   private onTileClick(touchEvent: cc.Event.EventTouch): void {
@@ -87,6 +105,8 @@ export default class BoardController extends cc.Component {
       );
       const removedTiles = this.BoardModel.removeGroupTiles(tileModel.group);
       this.removeTiles(removedTiles);
+
+      this.updateTiles();
     }
   }
 

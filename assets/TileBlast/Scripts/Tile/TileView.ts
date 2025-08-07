@@ -1,3 +1,5 @@
+import { Point } from "../utils/Point";
+
 const { ccclass, property } = cc._decorator;
 
 @ccclass
@@ -8,8 +10,29 @@ export default class TileView extends cc.Component {
   @property(cc.Sprite)
   private sprite: cc.Sprite = null;
 
+  private tween: cc.Tween | null = null;
+
   setup(sprite: cc.SpriteFrame, groupId: number): void {
     this.sprite.spriteFrame = sprite;
     this.groupIdLabel.string = `${groupId}`;
+  }
+
+  moveTo(position: Point): void {
+    if (this.tween) {
+      this.tween.stop();
+      this.tween = null;
+    }
+    this.tween = cc
+      .tween(this.node)
+      .to(0.2, { position: cc.v2(position.x, position.y) })
+      .call(() => {
+        this.tween = null;
+      })
+      .start();
+  }
+
+  //debug
+  setDebugInfo(id: number, groupId: number): void {
+    this.groupIdLabel.string = `${id}(${groupId})`;
   }
 }

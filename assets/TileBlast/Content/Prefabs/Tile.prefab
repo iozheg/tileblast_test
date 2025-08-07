@@ -27,14 +27,14 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 9
+        "__id__": 10
       },
       {
-        "__id__": 10
+        "__id__": 11
       }
     ],
     "_prefab": {
-      "__id__": 11
+      "__id__": 12
     },
     "_opacity": 255,
     "_color": {
@@ -230,10 +230,13 @@
     "_components": [
       {
         "__id__": 7
+      },
+      {
+        "__id__": 8
       }
     ],
     "_prefab": {
-      "__id__": 8
+      "__id__": 9
     },
     "_opacity": 255,
     "_color": {
@@ -245,8 +248,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 11.12,
-      "height": 50.4
+      "width": 13.12,
+      "height": 52.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -316,6 +319,24 @@
     "_id": ""
   },
   {
+    "__type__": "cc.LabelOutline",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 6
+    },
+    "_enabled": true,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    },
+    "_width": 1,
+    "_id": ""
+  },
+  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -335,7 +356,7 @@
     },
     "_enabled": true,
     "tileView": {
-      "__id__": 10
+      "__id__": 11
     },
     "_id": ""
   },
