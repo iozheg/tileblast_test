@@ -16,6 +16,9 @@ export default class BoardController extends cc.Component {
   private numRows: number = 7;
 
   @property(cc.Node)
+  board: cc.Node = null;
+
+  @property(cc.Node)
   tileContainer: cc.Node = null;
 
   @property(cc.Prefab)
@@ -41,7 +44,7 @@ export default class BoardController extends cc.Component {
     const types = this.tileTypes.map((type) => type.type);
     this.BoardModel = new BoardModel(this.numColumns, this.numRows, types);
 
-    this.tileContainer.setContentSize(
+    this.board.setContentSize(
       this.numColumns * this.tileSize,
       this.numRows * this.tileSize
     );
