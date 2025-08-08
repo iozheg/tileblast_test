@@ -1,5 +1,4 @@
 import { Point } from "../utils/Point";
-import TileGroupModel from "./TileGroupModel";
 import TypedTile from "./TypedTile";
 
 export default class TileModel implements TypedTile {
@@ -21,7 +20,7 @@ export default class TileModel implements TypedTile {
     return this.tileType;
   }
 
-  group: TileGroupModel | null = null;
+  group: string;
 
   constructor() {}
 

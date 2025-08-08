@@ -82,7 +82,7 @@ export default class BoardController extends cc.Component {
     )?.sprite;
 
     tileController.setup(tileModel, spriteFrame);
-    tileController.setDebugInfo(tileModel.id, tileModel.group.id);
+    tileController.setDebugInfo(tileModel.id, tileModel.group);
 
     tileController.node.on(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
 
@@ -101,7 +101,7 @@ export default class BoardController extends cc.Component {
         this.modelToController.set(tileModel, tileController);
       }
       tileController.setPosition(tileModel.position);
-      tileController.setDebugInfo(tileModel.id, tileModel.group.id);
+      tileController.setDebugInfo(tileModel.id, tileModel.group);
     }
   }
 
@@ -109,10 +109,10 @@ export default class BoardController extends cc.Component {
     const tileNode = touchEvent.currentTarget as cc.Node;
     const tileId = tileNode.getComponent(TileController).tileId;
     const tileModel = this.BoardModel.getTileById(tileId);
-    if (tileModel?.group.tileCount > 1) {
-      this.removeTiles(tileModel.group.tiles);
-      this.BoardModel.removeGroupTiles(tileModel.group);
 
+    const removedTiles = this.BoardModel.removeGroupTiles(tileModel);
+    if (removedTiles.length > 0) {
+      this.removeTiles(removedTiles);
       this.updateTiles();
     }
   }

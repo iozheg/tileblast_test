@@ -1,11 +1,9 @@
 import TileModel from "../Tile/TileModel";
-import TileGroupModel from "../Tile/TileGroupModel";
 import { Point } from "../utils/Point";
 import PooledFactory from "../utils/PooledFactory";
 
 export default class BoardModel {
   private grid: TileModel[] = [];
-  private tileGroups: TileGroupModel[] = [];
   private tileTypes: string[] = [];
   private numColumns: number;
   private numRows: number;
@@ -30,23 +28,27 @@ export default class BoardModel {
     return this.grid.find((tile) => tile && tile.id === id) || null;
   }
 
-  public removeGroupTiles(group: TileGroupModel): void {
-    for (let i = 0; i < this.grid.length; i++) {
-      if (this.grid[i] && this.grid[i].group === group) {
-        this.tileModelFactory.releaseInstance(this.grid[i]);
-        this.grid[i] = null;
+  public removeGroupTiles(tile: TileModel): TileModel[] {
+    const groupTiles = this.grid.filter((t) => t && t.group === tile.group);
+    if (groupTiles.length > 1) {
+      for (let i = 0; i < this.grid.length; i++) {
+        if (this.grid[i] && this.grid[i].group === tile.group) {
+          this.tileModelFactory.releaseInstance(this.grid[i]);
+          this.grid[i] = null;
+        }
       }
-    }
+      this.updateTilesPosition();
+      this.fillEmptyTiles();
+      this.assignGroups();
 
-    this.updateTilesPosition();
-    this.fillEmptyTiles();
-    this.assignGroups();
+      return groupTiles;
+    }
+    return [];
   }
 
   public clear() {
     this.tileModelFactory.clearPool();
     this.grid = [];
-    this.tileGroups = [];
   }
 
   private generateGrid(): void {
@@ -67,13 +69,13 @@ export default class BoardModel {
     for (const tile of this.grid) {
       tile && (tile.group = null);
     }
-    this.tileGroups = [];
+
+    let lastGroupId = 0;
 
     for (const tile of this.grid) {
       if (tile && !tile.group) {
-        const group = new TileGroupModel(this.tileGroups.length);
-        this.tileGroups.push(group);
-        this.fillGroup(group, tile);
+        this.fillGroup(lastGroupId.toString(), tile);
+        lastGroupId++;
       }
     }
   }
@@ -109,11 +111,12 @@ export default class BoardModel {
     }
   }
 
-  private fillGroup(group: TileGroupModel, tile: TileModel): void {
+  private fillGroup(group: string, tile: TileModel): void {
+    const type = tile.type;
     const stack: TileModel[] = [tile];
     while (stack.length > 0) {
       const currentTile = stack.pop();
-      if (this.addTileToGroup(currentTile, group)) {
+      if (this.addTileToGroup(currentTile, group, type)) {
         const neighbors = this.getNeighbors(currentTile);
         for (const neighbor of neighbors) {
           if (!neighbor.group && neighbor.type === currentTile.type) {
@@ -124,11 +127,13 @@ export default class BoardModel {
     }
   }
 
-  private addTileToGroup(tile: TileModel, group: TileGroupModel): boolean {
+  private addTileToGroup(
+    tile: TileModel,
+    group: string,
+    type: string
+  ): boolean {
     if (!tile.group) {
-      group.type ??= tile.type;
-      if (group.type === tile.type) {
-        group.addTile(tile);
+      if (type === tile.type) {
         tile.group = group;
         return true;
       }

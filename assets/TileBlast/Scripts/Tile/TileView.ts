@@ -63,7 +63,7 @@ export default class TileView extends cc.Component {
   }
 
   //debug
-  setDebugInfo(id: number, groupId: number): void {
+  setDebugInfo(id: number, groupId: string): void {
     this.groupIdLabel.string = `${id}(${groupId})`;
   }
 }

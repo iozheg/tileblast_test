@@ -44,7 +44,7 @@ export default class TileController extends cc.Component {
   }
 
   // debug
-  setDebugInfo(id: number, groupId: number): void {
+  setDebugInfo(id: number, groupId: string): void {
     this.tileView.setDebugInfo(id, groupId);
   }
 }
