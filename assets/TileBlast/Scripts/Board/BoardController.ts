@@ -127,6 +127,8 @@ export default class BoardController extends cc.Component {
       }
       this.modelToController.delete(model);
     }
+
+    this.node.emit(BoardControllerEvent.TILES_REMOVED, tileModels);
   }
 
   private getSpawnPosition(tileModel: TileModel): Point {
@@ -136,4 +138,8 @@ export default class BoardController extends cc.Component {
       y: -this.spawnField[tileModel.position.x] - 2,
     };
   }
+}
+
+export enum BoardControllerEvent {
+  TILES_REMOVED = "tiles-removed",
 }
