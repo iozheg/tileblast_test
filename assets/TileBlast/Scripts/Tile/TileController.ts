@@ -15,7 +15,7 @@ export default class TileController extends cc.Component {
 
   setup(model: TileModel, sprite: cc.SpriteFrame): void {
     this.tileId = model.id;
-    this.tileView.setup(sprite, model.group.id);
+    this.tileView.setup(sprite);
   }
 
   setSize(size: Point): void {

@@ -10,26 +10,45 @@ export default class TileView extends cc.Component {
   @property(cc.Sprite)
   private sprite: cc.Sprite = null;
 
-  private tween: cc.Tween | null = null;
+  @property(cc.Float)
+  private moveSpeed: number = 1000;
 
-  setup(sprite: cc.SpriteFrame, groupId: number): void {
+  private direction = cc.v3(0, -1, 0);
+  private targetPosition: cc.Vec3 | null = null;
+
+  // service vectors
+  private currentDistance: cc.Vec3 = cc.v3(0, 0, 0);
+  private moveStep: cc.Vec3 = cc.v3(0, 0, 0);
+
+  setup(sprite: cc.SpriteFrame): void {
     this.sprite.spriteFrame = sprite;
-    this.groupIdLabel.string = `${groupId}`;
     this.node.scale = 1;
   }
 
   moveTo(position: Point): void {
-    if (this.tween) {
-      this.tween.stop();
-      this.tween = null;
+    this.targetPosition = cc.v3(position.x, position.y, this.node.position.z);
+    cc.Vec3.subtract(this.direction, this.targetPosition, this.node.position);
+    this.direction.normalizeSelf();
+  }
+
+  update(dt: number): void {
+    if (this.targetPosition) {
+      const currentPos = this.node.position;
+      cc.Vec3.subtract(this.currentDistance, this.targetPosition, currentPos);
+      cc.Vec3.multiplyScalar(
+        this.moveStep,
+        this.direction,
+        this.moveSpeed * dt
+      );
+
+      if (this.moveStep.magSqr() >= this.currentDistance.magSqr()) {
+        this.node.setPosition(this.targetPosition);
+        this.targetPosition = null; // Stop moving
+      } else {
+        const newPos = currentPos.clone().add(this.moveStep);
+        this.node.setPosition(newPos);
+      }
     }
-    this.tween = cc
-      .tween(this.node)
-      .to(0.2, { position: cc.v2(position.x, position.y) })
-      .call(() => {
-        this.tween = null;
-      })
-      .start();
   }
 
   async remove(): Promise<void> {
