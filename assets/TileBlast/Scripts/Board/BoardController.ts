@@ -87,7 +87,8 @@ export default class BoardController extends cc.Component {
   private updateTiles(): void {
     this.spawnField.fill(0);
 
-    for (const tileModel of this.BoardModel.fieldTiles) {
+    for (let i = this.BoardModel.fieldTiles.length - 1; i >= 0; i--) {
+      const tileModel = this.BoardModel.fieldTiles[i];
       let tileController = this.modelToController.get(tileModel);
       if (!tileController) {
         const pos = this.getSpawnPosition(tileModel);
