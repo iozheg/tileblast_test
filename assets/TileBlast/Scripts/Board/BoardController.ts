@@ -34,7 +34,9 @@ export default class BoardController extends cc.Component {
 
   private tileSize: number = 0;
 
-  start() {
+  public init() {
+    this.reset();
+
     this.tileSize = this.tileContainer.getContentSize().width / this.numColumns;
     const types = this.tileTypes.map((type) => type.type);
     this.BoardModel = new BoardModel(this.numColumns, this.numRows, types);
@@ -137,6 +139,19 @@ export default class BoardController extends cc.Component {
       x: tileModel.position.x,
       y: -this.spawnField[tileModel.position.x] - 2,
     };
+  }
+
+  private reset() {
+    this.modelToController.forEach((controller) => {
+      controller.node.off(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
+      controller.node.destroy();
+    });
+    this.modelToController.clear();
+
+    this.tileControllersFactory?.clearPool();
+
+    this.spawnField = new Array(this.numColumns).fill(0);
+    this.BoardModel?.clear();
   }
 }
 

@@ -43,6 +43,8 @@ export default class GameController extends cc.Component {
     );
 
     this.dialogController.node.on("retry", this.retry, this);
+
+    this.boardController.init();
   }
 
   destroy(): boolean {
@@ -85,5 +87,6 @@ export default class GameController extends cc.Component {
 
   private retry() {
     this.gameProgress.reset();
+    this.boardController.init();
   }
 }

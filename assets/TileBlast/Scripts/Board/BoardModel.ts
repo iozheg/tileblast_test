@@ -43,6 +43,12 @@ export default class BoardModel {
     this.assignGroups();
   }
 
+  public clear() {
+    this.tileModelFactory.clearPool();
+    this.grid = [];
+    this.tileGroups = [];
+  }
+
   private generateGrid(): void {
     this.grid = [];
     for (let row = 0; row < this.numRows; row++) {
