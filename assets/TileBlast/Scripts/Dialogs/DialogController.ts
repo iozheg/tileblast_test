@@ -23,15 +23,12 @@ export default class DialogController extends cc.Component {
     this.successDialog.node.on("confirm", this.onRetry, this);
     this.failureDialog.node.on("confirm", this.onRetry, this);
 
-    this.backdrop.on(cc.Node.EventType.TOUCH_END, this.blockTouchEvents, this);
-
     this.hideDialogs();
   }
 
   destroy(): boolean {
     this.successDialog.node.off("confirm", this.onRetry, this);
     this.failureDialog.node.off("confirm", this.onRetry, this);
-    this.backdrop.off(cc.Node.EventType.TOUCH_END, this.blockTouchEvents, this);
     return super.destroy();
   }
 
@@ -68,9 +65,5 @@ export default class DialogController extends cc.Component {
     this.failureDialog.node.active = false;
 
     this.node.emit("retry");
-  }
-
-  private blockTouchEvents(event: cc.Event.EventTouch) {
-    event.stopPropagation();
   }
 }
