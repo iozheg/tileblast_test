@@ -5,6 +5,7 @@ import TileType from "../TileType";
 import ComponentPooledFactory from "../utils/ComponentPooledFactory";
 import { Point } from "../utils/Point";
 import TileFactory from "../Services/TileFactory";
+import TileBehaviourService from "../Services/TileBehaviourService";
 
 const { ccclass, property } = cc._decorator;
 
@@ -28,11 +29,16 @@ export default class BoardController extends cc.Component {
   @property([TileType])
   private tileTypes: TileType[] = [];
 
+  @property([TileType])
+  private specialTileTypes: TileType[] = [];
+
   private BoardModel: BoardModel;
 
   private tileFactory: TileFactory;
 
   private tileControllersFactory: ComponentPooledFactory<TileController>;
+
+  private behaviourService: TileBehaviourService;
 
   private modelToController: Map<TileModel, TileController> = new Map();
 
@@ -44,6 +50,7 @@ export default class BoardController extends cc.Component {
     this.reset();
 
     this.tileFactory = new TileFactory();
+    this.behaviourService = new TileBehaviourService();
 
     this.tileSize = this.tileContainer.getContentSize().width / this.numColumns;
     const types = this.tileTypes.map((type) => type.type);
@@ -71,10 +78,9 @@ export default class BoardController extends cc.Component {
   }
 
   private createTiles(): void {
-    for (const tileModel of this.BoardModel.fieldTiles) {
+    for (const tileModel of this.BoardModel.tiles) {
       if (!this.modelToController.has(tileModel)) {
-        const tileController = this.createTile(tileModel);
-        this.modelToController.set(tileModel, tileController);
+        this.createTile(tileModel);
       }
     }
   }
@@ -87,28 +93,35 @@ export default class BoardController extends cc.Component {
     tileController.setSize({ x: this.tileSize, y: this.tileSize });
     tileController.setPosition(startPosition ?? tileModel.position, true);
 
-    const spriteFrame = this.tileTypes.find(
+    let spriteFrame = this.tileTypes.find(
       (type) => type.type === tileModel.type
     )?.sprite;
+
+    if (!spriteFrame) {
+      spriteFrame = this.specialTileTypes.find(
+        (type) => type.type === tileModel.behaviour
+      )?.sprite;
+    }
 
     tileController.setup(tileModel, spriteFrame);
     tileController.setDebugInfo(tileModel.id, tileModel.group);
 
     tileController.node.on(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
 
+    this.modelToController.set(tileModel, tileController);
+
     return tileController;
   }
 
-  private updateTiles(): void {
+  private syncTiles(): void {
     this.spawnField.fill(0);
 
-    for (let i = this.BoardModel.fieldTiles.length - 1; i >= 0; i--) {
-      const tileModel = this.BoardModel.fieldTiles[i];
+    for (let i = this.BoardModel.tiles.length - 1; i >= 0; i--) {
+      const tileModel = this.BoardModel.tiles[i];
       let tileController = this.modelToController.get(tileModel);
       if (!tileController) {
         const pos = this.getSpawnPosition(tileModel);
         tileController = this.createTile(tileModel, pos);
-        this.modelToController.set(tileModel, tileController);
       }
       tileController.setPosition(tileModel.position);
       tileController.setDebugInfo(tileModel.id, tileModel.group);
@@ -118,13 +131,31 @@ export default class BoardController extends cc.Component {
   private onTileClick(touchEvent: cc.Event.EventTouch): void {
     const tileNode = touchEvent.currentTarget as cc.Node;
     const tileId = tileNode.getComponent(TileController).tileId;
-    const tileModel = this.BoardModel.getTileById(tileId);
+    const clickedTile = this.BoardModel.getTileById(tileId);
 
-    const removedTiles = this.BoardModel.removeGroupTiles(tileModel);
-    if (removedTiles.length > 0) {
-      this.removeTiles(removedTiles);
+    const affectedTiles = this.behaviourService.run(
+      clickedTile,
+      this.BoardModel
+    );
+    if (affectedTiles.length > 1) {
+      this.BoardModel.removeTiles(affectedTiles);
+      this.removeTiles(affectedTiles);
+      if (!clickedTile.behaviour) {
+        const behaviour = this.behaviourService.getBehaviour(affectedTiles);
+        if (behaviour) {
+          const specialTile = this.tileFactory.create({
+            type: "special",
+            behaviour: behaviour,
+            position: clickedTile.position,
+          });
+          this.BoardModel.setTileAt(specialTile.position, specialTile);
+          this.createTile(specialTile, clickedTile.position);
+        }
+      }
+
+      this.BoardModel.update();
       setTimeout(() => {
-        this.updateTiles();
+        this.syncTiles();
       }, 200);
     }
   }
@@ -164,6 +195,7 @@ export default class BoardController extends cc.Component {
     this.modelToController.clear();
 
     this.tileControllersFactory?.clearPool();
+    this.tileFactory?.clearPool();
 
     this.spawnField = new Array(this.numColumns).fill(0);
     this.BoardModel?.clear();

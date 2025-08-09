@@ -7,11 +7,18 @@ export default class BoardModel {
   private tileTypes: string[] = [];
   private numColumns: number;
   private numRows: number;
-
   private tileFactory: TileFactory;
 
-  get fieldTiles(): TileModel[] {
+  get tiles(): TileModel[] {
     return this.grid;
+  }
+
+  get width(): number {
+    return this.numColumns;
+  }
+
+  get height(): number {
+    return this.numRows;
   }
 
   constructor(
@@ -32,22 +39,31 @@ export default class BoardModel {
     return this.grid.find((tile) => tile && tile.id === id) || null;
   }
 
-  public removeGroupTiles(tile: TileModel): TileModel[] {
-    const groupTiles = this.grid.filter((t) => t && t.group === tile.group);
-    if (groupTiles.length > 1) {
-      for (let i = 0; i < this.grid.length; i++) {
-        if (this.grid[i] && this.grid[i].group === tile.group) {
-          this.tileFactory.release(this.grid[i]);
-          this.grid[i] = null;
-        }
-      }
-      this.updateTilesPosition();
-      this.fillEmptyTiles();
-      this.assignGroups();
+  public getTileAt(row: number, col: number): TileModel | null {
+    const index = this.getTileIndexAt(row, col);
+    return index !== -1 ? this.grid[index] : null;
+  }
 
-      return groupTiles;
+  public setTileAt(position: Point, tile: TileModel): void {
+    const index = this.getTileIndexAt(position.y, position.x);
+    if (index !== -1) {
+      this.grid[index] = tile;
     }
-    return [];
+  }
+
+  public removeTiles(tileModels: TileModel[]): void {
+    for (const model of tileModels) {
+      const index = this.grid.indexOf(model);
+      if (index !== -1) {
+        this.grid[index] = null;
+      }
+    }
+  }
+
+  public update(): void {
+    this.updateTilesPosition();
+    this.fillEmptyTiles();
+    this.assignGroups();
   }
 
   public clear() {
@@ -174,11 +190,6 @@ export default class BoardModel {
       }
     }
     return -1;
-  }
-
-  private getTileAt(row: number, col: number): TileModel | null {
-    const index = this.getTileIndexAt(row, col);
-    return index !== -1 ? this.grid[index] : null;
   }
 
   private getTileIndexAt(row: number, col: number): number {

@@ -6,7 +6,7 @@ export default class TileModel implements TypedTile {
 
   type: string;
 
-  behaviour: string = "normal";
+  behaviour: string = null;
 
   position: Point;
 

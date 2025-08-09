@@ -15,7 +15,7 @@ export default class TileFactory {
     if (options) {
       tile.position = options.position || tile.position;
       tile.type = options.type || tile.type;
-      tile.behaviour = options.behaviour || tile.behaviour;
+      tile.behaviour = options.behaviour || null;
     }
     return tile;
   }
@@ -35,6 +35,6 @@ export default class TileFactory {
 
 export type TileOptions = {
   position?: Point;
-  type?: string;
-  behaviour?: string;
+  type?: typeof TileModel.prototype.type;
+  behaviour?: typeof TileModel.prototype.behaviour;
 };
