@@ -1602,7 +1602,7 @@
     "scoreLabel": {
       "__id__": 33
     },
-    "movesLimit": 10,
+    "movesLimit": 30,
     "scoreTarget": 100,
     "_id": "22jRWDP/5EzLXimem/T7SY"
   },

@@ -1,6 +1,6 @@
 import TileModel from "../Tile/TileModel";
+import TileFactory from "../Services/TileFactory";
 import { Point } from "../utils/Point";
-import PooledFactory from "../utils/PooledFactory";
 
 export default class BoardModel {
   private grid: TileModel[] = [];
@@ -8,23 +8,27 @@ export default class BoardModel {
   private numColumns: number;
   private numRows: number;
 
-  private tileModelFactory: PooledFactory<TileModel>;
+  private tileFactory: TileFactory;
 
   get fieldTiles(): TileModel[] {
     return this.grid;
   }
 
-  constructor(numColumns: number, numRows: number, tileTypes: string[]) {
+  constructor(
+    numColumns: number,
+    numRows: number,
+    tileTypes: string[],
+    tileFactory: TileFactory
+  ) {
     this.numColumns = numColumns;
     this.numRows = numRows;
     this.tileTypes = tileTypes;
-
-    this.tileModelFactory = new PooledFactory(TileModel, numColumns * numRows);
+    this.tileFactory = tileFactory;
 
     this.generateGrid();
   }
 
-  public getTileById(id: number): TileModel | null {
+  public getTileById(id: string): TileModel | null {
     return this.grid.find((tile) => tile && tile.id === id) || null;
   }
 
@@ -33,7 +37,7 @@ export default class BoardModel {
     if (groupTiles.length > 1) {
       for (let i = 0; i < this.grid.length; i++) {
         if (this.grid[i] && this.grid[i].group === tile.group) {
-          this.tileModelFactory.releaseInstance(this.grid[i]);
+          this.tileFactory.release(this.grid[i]);
           this.grid[i] = null;
         }
       }
@@ -47,7 +51,6 @@ export default class BoardModel {
   }
 
   public clear() {
-    this.tileModelFactory.clearPool();
     this.grid = [];
   }
 
@@ -55,9 +58,10 @@ export default class BoardModel {
     this.grid = [];
     for (let row = 0; row < this.numRows; row++) {
       for (let col = 0; col < this.numColumns; col++) {
-        const tile = this.tileModelFactory.create();
-        tile.id = this.grid.length;
-        tile.init(row, col, this.getRandomTileType());
+        const tile = this.tileFactory.create({
+          position: { x: col, y: row },
+          type: this.getRandomTileType(),
+        });
         this.grid.push(tile);
       }
     }
@@ -100,13 +104,13 @@ export default class BoardModel {
   private fillEmptyTiles(): void {
     for (let i = 0; i < this.grid.length; i++) {
       if (!this.grid[i]) {
-        this.grid[i] = this.tileModelFactory.create();
-        const position = {
-          x: i % this.numColumns,
-          y: Math.floor(i / this.numColumns),
-        };
-
-        this.grid[i].init(position.y, position.x, this.getRandomTileType());
+        this.grid[i] = this.tileFactory.create({
+          position: {
+            x: i % this.numColumns,
+            y: Math.floor(i / this.numColumns),
+          },
+          type: this.getRandomTileType(),
+        });
       }
     }
   }

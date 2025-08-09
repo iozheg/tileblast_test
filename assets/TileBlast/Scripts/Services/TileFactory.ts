@@ -1,0 +1,40 @@
+import TileModel from "../Tile/TileModel";
+import { Point } from "../utils/Point";
+
+export default class TileFactory {
+  private pool: TileModel[] = [];
+
+  public create(options?: TileOptions): TileModel {
+    let tile: TileModel;
+    if (this.pool.length > 0) {
+      tile = this.pool.pop()!;
+    } else {
+      tile = new TileModel();
+    }
+    tile.id = this.generateId();
+    if (options) {
+      tile.position = options.position || tile.position;
+      tile.type = options.type || tile.type;
+      tile.behaviour = options.behaviour || tile.behaviour;
+    }
+    return tile;
+  }
+
+  public release(tile: TileModel): void {
+    this.pool.push(tile);
+  }
+
+  public clearPool(): void {
+    this.pool = [];
+  }
+
+  private generateId(): string {
+    return Math.random().toString(36).substring(2, 9);
+  }
+}
+
+export type TileOptions = {
+  position?: Point;
+  type?: string;
+  behaviour?: string;
+};

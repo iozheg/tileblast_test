@@ -1,4 +1,4 @@
 export default interface TypedTile {
-  id: number;
+  id: string;
   readonly type: string;
 }

@@ -4,6 +4,7 @@ import TileModel from "../Tile/TileModel";
 import TileType from "../TileType";
 import ComponentPooledFactory from "../utils/ComponentPooledFactory";
 import { Point } from "../utils/Point";
+import TileFactory from "../Services/TileFactory";
 
 const { ccclass, property } = cc._decorator;
 
@@ -29,6 +30,8 @@ export default class BoardController extends cc.Component {
 
   private BoardModel: BoardModel;
 
+  private tileFactory: TileFactory;
+
   private tileControllersFactory: ComponentPooledFactory<TileController>;
 
   private modelToController: Map<TileModel, TileController> = new Map();
@@ -40,9 +43,16 @@ export default class BoardController extends cc.Component {
   public init() {
     this.reset();
 
+    this.tileFactory = new TileFactory();
+
     this.tileSize = this.tileContainer.getContentSize().width / this.numColumns;
     const types = this.tileTypes.map((type) => type.type);
-    this.BoardModel = new BoardModel(this.numColumns, this.numRows, types);
+    this.BoardModel = new BoardModel(
+      this.numColumns,
+      this.numRows,
+      types,
+      this.tileFactory
+    );
 
     this.board.setContentSize(
       this.numColumns * this.tileSize,
@@ -113,7 +123,9 @@ export default class BoardController extends cc.Component {
     const removedTiles = this.BoardModel.removeGroupTiles(tileModel);
     if (removedTiles.length > 0) {
       this.removeTiles(removedTiles);
-      this.updateTiles();
+      setTimeout(() => {
+        this.updateTiles();
+      }, 200);
     }
   }
 

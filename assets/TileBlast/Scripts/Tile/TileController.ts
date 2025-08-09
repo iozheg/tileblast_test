@@ -9,7 +9,7 @@ export default class TileController extends cc.Component {
   @property(TileView)
   private tileView: TileView = null;
 
-  tileId: number;
+  tileId: string;
 
   private positionOffset: Point = { x: 0, y: 0 };
 
@@ -44,7 +44,7 @@ export default class TileController extends cc.Component {
   }
 
   // debug
-  setDebugInfo(id: number, groupId: string): void {
+  setDebugInfo(id: string, groupId: string): void {
     this.tileView.setDebugInfo(id, groupId);
   }
 }
