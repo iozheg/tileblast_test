@@ -44,15 +44,14 @@ export default class BoardController extends cc.Component {
 
   private spawnField: number[] = [];
 
-  private tileSize: number = 0;
-
   public init() {
     this.reset();
 
     this.tileFactory = new TileFactory();
     this.behaviourService = new TileBehaviourService();
 
-    this.tileSize = this.tileContainer.getContentSize().width / this.numColumns;
+    const tileSize =
+      this.tileContainer.getContentSize().width / this.numColumns;
     const types = this.tileTypes.map((type) => type.type);
     this.BoardModel = new BoardModel(
       this.numColumns,
@@ -62,14 +61,14 @@ export default class BoardController extends cc.Component {
     );
 
     this.board.setContentSize(
-      this.numColumns * this.tileSize,
-      this.numRows * this.tileSize
+      this.numColumns * tileSize,
+      this.numRows * tileSize
     );
 
     this.tileControllersFactory = new ComponentPooledFactory(
       this.tilePrefab,
       this.tileContainer,
-      this.tileSize,
+      tileSize,
       [...this.tileTypes, ...this.specialTileTypes],
       this.numColumns * this.numRows
     );
