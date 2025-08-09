@@ -42,9 +42,4 @@ export default class TileController extends cc.Component {
   async destroyTile(): Promise<void> {
     await this.tileView.remove();
   }
-
-  // debug
-  setDebugInfo(id: string, groupId: string): void {
-    this.tileView.setDebugInfo(id, groupId);
-  }
 }

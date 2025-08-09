@@ -43,7 +43,7 @@ export default class TileView extends cc.Component {
 
       if (this.moveStep.magSqr() >= this.currentDistance.magSqr()) {
         this.node.setPosition(this.targetPosition);
-        this.targetPosition = null; // Stop moving
+        this.targetPosition = null;
       } else {
         const newPos = currentPos.clone().add(this.moveStep);
         this.node.setPosition(newPos);
@@ -60,10 +60,5 @@ export default class TileView extends cc.Component {
         })
         .start();
     });
-  }
-
-  //debug
-  setDebugInfo(id: string, groupId: string): void {
-    this.groupIdLabel.string = `${id}(${groupId})`;
   }
 }

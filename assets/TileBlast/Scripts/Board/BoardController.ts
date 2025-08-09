@@ -2,7 +2,7 @@ import BoardModel from "./BoardModel";
 import TileController from "../Tile/TileController";
 import TileModel from "../Tile/TileModel";
 import TileType from "../TileType";
-import ComponentPooledFactory from "../utils/ComponentPooledFactory";
+import ComponentPooledFactory from "../Services/TileControllerFactory";
 import { Point } from "../utils/Point";
 import TileFactory from "../Services/TileFactory";
 import TileBehaviourService from "../Services/TileBehaviourService";
@@ -36,7 +36,7 @@ export default class BoardController extends cc.Component {
 
   private tileFactory: TileFactory;
 
-  private tileControllersFactory: ComponentPooledFactory<TileController>;
+  private tileControllersFactory: ComponentPooledFactory;
 
   private behaviourService: TileBehaviourService;
 
@@ -68,8 +68,9 @@ export default class BoardController extends cc.Component {
 
     this.tileControllersFactory = new ComponentPooledFactory(
       this.tilePrefab,
-      TileController,
       this.tileContainer,
+      this.tileSize,
+      [...this.tileTypes, ...this.specialTileTypes],
       this.numColumns * this.numRows
     );
     this.createTiles();
@@ -89,26 +90,14 @@ export default class BoardController extends cc.Component {
     tileModel: TileModel,
     startPosition?: Point
   ): TileController {
-    const tileController = this.tileControllersFactory.getInstance();
-    tileController.setSize({ x: this.tileSize, y: this.tileSize });
-    tileController.setPosition(startPosition ?? tileModel.position, true);
-
-    let spriteFrame = this.tileTypes.find(
-      (type) => type.type === tileModel.type
-    )?.sprite;
-
-    if (!spriteFrame) {
-      spriteFrame = this.specialTileTypes.find(
-        (type) => type.type === tileModel.behaviour
-      )?.sprite;
+    const tileController = this.tileControllersFactory.getInstance(tileModel);
+    if (startPosition) {
+      tileController.setPosition(startPosition, true);
     }
 
-    tileController.setup(tileModel, spriteFrame);
-    tileController.setDebugInfo(tileModel.id, tileModel.group);
+    this.modelToController.set(tileModel, tileController);
 
     tileController.node.on(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
-
-    this.modelToController.set(tileModel, tileController);
 
     return tileController;
   }
@@ -124,7 +113,6 @@ export default class BoardController extends cc.Component {
         tileController = this.createTile(tileModel, pos);
       }
       tileController.setPosition(tileModel.position);
-      tileController.setDebugInfo(tileModel.id, tileModel.group);
     }
   }
 
