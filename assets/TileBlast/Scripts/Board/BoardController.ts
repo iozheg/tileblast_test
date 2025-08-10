@@ -3,7 +3,7 @@ import TileController from "../Tile/TileController";
 import TileModel from "../Tile/TileModel";
 import TileType from "../TileType";
 import { Point } from "../utils/Point";
-import TileFactory from "../Services/TileFactory";
+import TileModelFactory from "../Services/TileModelFactory";
 import TileBehaviourService from "../Services/TileBehaviourService";
 import { delay, getDistance } from "../utils/Utils";
 import EffectProcessor, { TileEffect } from "../utils/EffectProcessor";
@@ -43,7 +43,7 @@ export default class BoardController extends cc.Component {
 
   private BoardModel: BoardModel;
 
-  private tileFactory: TileFactory;
+  private tileModelFactory: TileModelFactory;
 
   private behaviourService: TileBehaviourService;
 
@@ -63,7 +63,7 @@ export default class BoardController extends cc.Component {
   public init() {
     this.reset();
 
-    this.tileFactory = new TileFactory();
+    this.tileModelFactory = new TileModelFactory();
     this.behaviourService = new TileBehaviourService();
 
     const tileSize =
@@ -76,7 +76,7 @@ export default class BoardController extends cc.Component {
       this.numColumns,
       this.numRows,
       types,
-      this.tileFactory
+      this.tileModelFactory
     );
 
     this.board.setContentSize(
@@ -180,7 +180,7 @@ export default class BoardController extends cc.Component {
   ): TileModel {
     const behaviour = this.behaviourService.getBehaviour(tilesToRemove);
     if (behaviour) {
-      const specialTile = this.tileFactory.create({
+      const specialTile = this.tileModelFactory.create({
         type: "special",
         behaviour: behaviour,
         position: causePosition,
@@ -248,7 +248,7 @@ export default class BoardController extends cc.Component {
     this.modelToController.clear();
 
     this.tileLifecycleManager.reset();
-    this.tileFactory?.clearPool();
+    this.tileModelFactory?.clearPool();
 
     this.spawnField = new Array(this.numColumns).fill(0);
     this.BoardModel?.clear();

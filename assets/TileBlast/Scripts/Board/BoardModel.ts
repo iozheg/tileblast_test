@@ -1,5 +1,5 @@
 import TileModel from "../Tile/TileModel";
-import TileFactory from "../Services/TileFactory";
+import TileModelFactory from "../Services/TileModelFactory";
 import { Point } from "../utils/Point";
 
 export default class BoardModel {
@@ -7,7 +7,7 @@ export default class BoardModel {
   private tileTypes: string[] = [];
   private numColumns: number;
   private numRows: number;
-  private tileFactory: TileFactory;
+  private tileFactory: TileModelFactory;
 
   get tiles(): TileModel[] {
     return this.grid;
@@ -25,7 +25,7 @@ export default class BoardModel {
     numColumns: number,
     numRows: number,
     tileTypes: string[],
-    tileFactory: TileFactory
+    tileFactory: TileModelFactory
   ) {
     this.numColumns = numColumns;
     this.numRows = numRows;

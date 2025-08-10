@@ -1,7 +1,7 @@
 import TileModel from "../Tile/TileModel";
 import { Point } from "../utils/Point";
 
-export default class TileFactory {
+export default class TileModelFactory {
   private pool: TileModel[] = [];
 
   public create(options: TileOptions = {}): TileModel {
