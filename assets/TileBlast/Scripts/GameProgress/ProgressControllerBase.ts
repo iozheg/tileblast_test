@@ -5,7 +5,7 @@ const { ccclass } = cc._decorator;
 @ccclass
 export default abstract class ProgressControllerBase extends cc.Component {
   abstract reset(): void;
-  abstract onTilesRemoved(tileModels: TypedTile[]): void;
+  abstract onTilesRemoved(tileModels: TypedTile[], isUserAction: boolean): void;
 }
 
 export enum ProgressControllerEvent {

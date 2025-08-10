@@ -73,8 +73,8 @@ export default class GameController extends cc.Component {
 
   // update (dt) {}
 
-  private onTilesRemoved(tileModels: TypedTile[]): void {
-    this.gameProgress.onTilesRemoved(tileModels);
+  private onTilesRemoved(tileModels: TypedTile[], isUserAction: boolean): void {
+    this.gameProgress.onTilesRemoved(tileModels, isUserAction);
   }
 
   private onGoalReached(): void {
