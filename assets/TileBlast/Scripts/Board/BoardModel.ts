@@ -72,10 +72,10 @@ export default class BoardModel {
   }
 
   private performRemove(commitId: number) {
-    for (const model of this.grid) {
-      const index = this.grid.indexOf(model);
-      if (index !== -1 && model.commitId === commitId) {
-        this.grid[index] = null;
+    for (let i = this.grid.length - 1; i >= 0; i--) {
+      const model = this.grid[i];
+      if (model && model.commitId === commitId) {
+        this.grid[i] = null;
       }
     }
   }
@@ -93,21 +93,6 @@ export default class BoardModel {
     }
 
     this.assignGroups();
-  }
-
-  private assignGroups(): void {
-    for (const tile of this.grid) {
-      tile && (tile.group = null);
-    }
-
-    let lastGroupId = 0;
-
-    for (const tile of this.grid) {
-      if (tile && !tile.group) {
-        this.fillGroup(lastGroupId.toString(), tile);
-        lastGroupId++;
-      }
-    }
   }
 
   private updateTilesPosition(): void {
@@ -142,6 +127,21 @@ export default class BoardModel {
     }
   }
 
+  private assignGroups(): void {
+    for (const tile of this.grid) {
+      tile && (tile.group = null);
+    }
+
+    let lastGroupId = 0;
+
+    for (const tile of this.grid) {
+      if (tile && !tile.group) {
+        this.fillGroup(lastGroupId.toString(), tile);
+        lastGroupId++;
+      }
+    }
+  }
+
   private fillGroup(group: string, tile: TileModel): void {
     const type = tile.type;
     const stack: TileModel[] = [tile];
@@ -163,11 +163,9 @@ export default class BoardModel {
     group: string,
     type: string
   ): boolean {
-    if (!tile.group) {
-      if (type === tile.type) {
-        tile.group = group;
-        return true;
-      }
+    if (!tile.group && type === tile.type) {
+      tile.group = group;
+      return true;
     }
     return false;
   }
