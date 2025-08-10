@@ -51,23 +51,33 @@ export default class BoardModel {
     }
   }
 
-  public removeTiles(tileModels: TileModel[]): void {
+  public stageRemoving(tileModels: TileModel[], commitId: number): void {
     for (const model of tileModels) {
       const index = this.grid.indexOf(model);
-      if (index !== -1) {
-        this.grid[index] = null;
+      if (index !== -1 && model.commitId === 0) {
+        this.grid[index].commitId = commitId;
       }
     }
   }
 
-  public update(): void {
+  public commit(commitId: number): void {
+    this.performRemove(commitId);
     this.updateTilesPosition();
-    this.fillEmptyTiles();
+    this.fillEmptyTiles(commitId);
     this.assignGroups();
   }
 
   public clear() {
     this.grid = [];
+  }
+
+  private performRemove(commitId: number) {
+    for (const model of this.grid) {
+      const index = this.grid.indexOf(model);
+      if (index !== -1 && model.commitId === commitId) {
+        this.grid[index] = null;
+      }
+    }
   }
 
   private generateGrid(): void {
@@ -117,7 +127,7 @@ export default class BoardModel {
     }
   }
 
-  private fillEmptyTiles(): void {
+  private fillEmptyTiles(commitId: number): void {
     for (let i = 0; i < this.grid.length; i++) {
       if (!this.grid[i]) {
         this.grid[i] = this.tileFactory.create({
@@ -127,6 +137,7 @@ export default class BoardModel {
           },
           type: this.getRandomTileType(),
         });
+        this.grid[i].commitId = commitId;
       }
     }
   }
@@ -185,7 +196,7 @@ export default class BoardModel {
   private getFirstAboveTileIndex(position: Point): number {
     for (let row = position.y - 1; row >= 0; row--) {
       const aboveTileIndex = this.getTileIndexAt(row, position.x);
-      if (aboveTileIndex !== -1 && this.grid[aboveTileIndex]) {
+      if (aboveTileIndex !== -1 && this.grid[aboveTileIndex]?.commitId === 0) {
         return aboveTileIndex;
       }
     }

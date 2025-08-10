@@ -3975,6 +3975,7 @@
     "tilePrefab": {
       "__uuid__": "7a93abfc-4eeb-4559-956e-7955d080d244"
     },
+    "usedTileTypes": 4,
     "tileTypes": [
       {
         "__id__": 101

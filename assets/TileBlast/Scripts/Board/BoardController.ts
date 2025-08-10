@@ -6,8 +6,15 @@ import ComponentPooledFactory from "../Services/TileControllerFactory";
 import { Point } from "../utils/Point";
 import TileFactory from "../Services/TileFactory";
 import TileBehaviourService from "../Services/TileBehaviourService";
+import { delay, getDistance } from "../utils/Utils";
+import EffectProcessor, { TileEffect } from "../utils/EffectProcessor";
 
 const { ccclass, property } = cc._decorator;
+
+type EffectData = {
+  cause: TileModel;
+  isUserAction: boolean;
+};
 
 @ccclass
 export default class BoardController extends cc.Component {
@@ -25,6 +32,9 @@ export default class BoardController extends cc.Component {
 
   @property(cc.Prefab)
   tilePrefab: cc.Prefab = null;
+
+  @property
+  private usedTileTypes = 4;
 
   @property([TileType])
   private tileTypes: TileType[] = [];
@@ -44,6 +54,15 @@ export default class BoardController extends cc.Component {
 
   private spawnField: number[] = [];
 
+  private baseDelay = 50;
+
+  private effectProcessor: EffectProcessor<EffectData> = new EffectProcessor(
+    (effect) => this.handleEffect(effect),
+    () => {
+      this.spawnField.fill(0);
+    }
+  );
+
   public init() {
     this.reset();
 
@@ -52,7 +71,10 @@ export default class BoardController extends cc.Component {
 
     const tileSize =
       this.tileContainer.getContentSize().width / this.numColumns;
-    const types = this.tileTypes.map((type) => type.type);
+
+    const types = this.tileTypes
+      .slice(0, this.usedTileTypes)
+      .map((type) => type.type);
     this.BoardModel = new BoardModel(
       this.numColumns,
       this.numRows,
@@ -101,69 +123,112 @@ export default class BoardController extends cc.Component {
     return tileController;
   }
 
-  private syncTiles(): void {
-    this.spawnField.fill(0);
-
-    for (let i = this.BoardModel.tiles.length - 1; i >= 0; i--) {
-      const tileModel = this.BoardModel.tiles[i];
-      let tileController = this.modelToController.get(tileModel);
-      if (!tileController) {
-        const pos = this.getSpawnPosition(tileModel);
-        tileController = this.createTile(tileModel, pos);
-      }
-      tileController.setPosition(tileModel.position);
-    }
-  }
-
   private onTileClick(touchEvent: cc.Event.EventTouch): void {
     const tileNode = touchEvent.currentTarget as cc.Node;
     const tileId = tileNode.getComponent(TileController).tileId;
     const clickedTile = this.BoardModel.getTileById(tileId);
 
+    this.effectProcessor.addEffect(0, {
+      cause: clickedTile,
+      isUserAction: true,
+    });
+  }
+
+  private async handleEffect(effect: TileEffect<EffectData>) {
     const affectedTiles = this.behaviourService.run(
-      clickedTile,
+      effect.data.cause,
       this.BoardModel
     );
+
     if (affectedTiles.length > 1) {
-      this.BoardModel.removeTiles(affectedTiles);
-      this.removeTiles(affectedTiles);
-      if (!clickedTile.behaviour) {
-        const behaviour = this.behaviourService.getBehaviour(affectedTiles);
-        if (behaviour) {
-          const specialTile = this.tileFactory.create({
-            type: "special",
-            behaviour: behaviour,
-            position: clickedTile.position,
-          });
-          this.BoardModel.setTileAt(specialTile.position, specialTile);
-          this.createTile(specialTile, clickedTile.position);
-        }
+      if (effect.data.cause.behaviour) {
+        this.checkChainReaction(affectedTiles, effect.data.cause);
+      } else {
+        this.createSpecialTile(affectedTiles, effect.data.cause.position);
       }
 
-      this.BoardModel.update();
-      setTimeout(() => {
-        this.syncTiles();
-      }, 200);
+      this.BoardModel.stageRemoving(affectedTiles, effect.commitId);
+      await this.animateRemoveTiles(effect, affectedTiles);
+
+      await delay(100);
+      this.BoardModel.commit(effect.commitId);
+      this.syncTiles(effect.commitId);
     }
   }
 
-  private removeTiles(tileModels: TileModel[]) {
+  private checkChainReaction(affectedTiles: TileModel[], causeTile: TileModel) {
+    affectedTiles.forEach((tile) => {
+      if (causeTile !== tile && tile.behaviour && tile.commitId === 0) {
+        const distance = getDistance(causeTile.position, tile.position);
+        this.effectProcessor.addEffect(distance * this.baseDelay, {
+          cause: tile,
+          isUserAction: false,
+        });
+      }
+    });
+  }
+
+  private createSpecialTile(tilesToRemove: TileModel[], causePosition: Point) {
+    const behaviour = this.behaviourService.getBehaviour(tilesToRemove);
+    if (behaviour) {
+      const specialTile = this.tileFactory.create({
+        type: "special",
+        behaviour: behaviour,
+        position: causePosition,
+      });
+      this.BoardModel.setTileAt(specialTile.position, specialTile);
+      this.createTile(specialTile, causePosition);
+    }
+  }
+
+  private async animateRemoveTiles(
+    effect: TileEffect<EffectData>,
+    tileModels: TileModel[]
+  ) {
+    const animations: Promise<void>[] = [];
+
     for (const model of tileModels) {
       const tileController = this.modelToController.get(model);
       if (tileController) {
-        tileController.destroyTile().then(() => {
-          tileController.node.off(
-            cc.Node.EventType.TOUCH_END,
-            this.onTileClick,
-            this
-          );
-          this.tileControllersFactory.releaseInstance(tileController);
-        });
+        const distance = effect.data.cause.behaviour
+          ? getDistance(effect.data.cause.position, model.position)
+          : 0;
+        const anim = delay(distance * this.baseDelay)
+          .then(() => tileController.destroyTile())
+          .then(() => {
+            tileController.node.off(
+              cc.Node.EventType.TOUCH_END,
+              this.onTileClick,
+              this
+            );
+            this.tileControllersFactory.releaseInstance(tileController);
+          });
+        animations.push(anim);
       }
       this.modelToController.delete(model);
     }
 
-    this.node.emit(BoardControllerEvent.TILES_REMOVED, tileModels);
+    await Promise.all(animations);
+
+    this.node.emit(
+      BoardControllerEvent.TILES_REMOVED,
+      tileModels,
+      effect.data.isUserAction
+    );
+  }
+
+  private syncTiles(commitId: number): void {
+    for (let i = this.BoardModel.tiles.length - 1; i >= 0; i--) {
+      const tileModel = this.BoardModel.tiles[i];
+
+      let tileController = this.modelToController.get(tileModel);
+      if (!tileController && tileModel.commitId === commitId) {
+        const pos = this.getSpawnPosition(tileModel);
+        tileController = this.createTile(tileModel, pos);
+        tileModel.commitId = 0;
+      }
+      tileController?.setPosition(tileModel.position);
+    }
   }
 
   private getSpawnPosition(tileModel: TileModel): Point {

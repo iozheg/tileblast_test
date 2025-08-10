@@ -16,6 +16,8 @@ export default class TileView extends cc.Component {
   private direction = cc.v3(0, -1, 0);
   private targetPosition: cc.Vec3 | null = null;
 
+  private isRemoving: boolean = false;
+
   // service vectors
   private currentDistance: cc.Vec3 = cc.v3(0, 0, 0);
   private moveStep: cc.Vec3 = cc.v3(0, 0, 0);
@@ -26,9 +28,11 @@ export default class TileView extends cc.Component {
   }
 
   moveTo(position: Point): void {
-    this.targetPosition = cc.v3(position.x, position.y, this.node.position.z);
-    cc.Vec3.subtract(this.direction, this.targetPosition, this.node.position);
-    this.direction.normalizeSelf();
+    if (!this.isRemoving) {
+      this.targetPosition = cc.v3(position.x, position.y, this.node.position.z);
+      cc.Vec3.subtract(this.direction, this.targetPosition, this.node.position);
+      this.direction.normalizeSelf();
+    }
   }
 
   update(dt: number): void {
@@ -52,10 +56,13 @@ export default class TileView extends cc.Component {
   }
 
   async remove(): Promise<void> {
+    this.isRemoving = true;
+    this.targetPosition = null;
     return new Promise((resolve) => {
       cc.tween(this.node)
         .to(0.2, { scale: 0 })
         .call(() => {
+          this.isRemoving = false;
           resolve();
         })
         .start();

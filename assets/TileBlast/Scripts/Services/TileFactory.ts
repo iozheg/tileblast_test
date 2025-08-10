@@ -4,7 +4,7 @@ import { Point } from "../utils/Point";
 export default class TileFactory {
   private pool: TileModel[] = [];
 
-  public create(options?: TileOptions): TileModel {
+  public create(options: TileOptions = {}): TileModel {
     let tile: TileModel;
     if (this.pool.length > 0) {
       tile = this.pool.pop()!;
@@ -12,11 +12,10 @@ export default class TileFactory {
       tile = new TileModel();
     }
     tile.id = this.generateId();
-    if (options) {
-      tile.position = options.position || tile.position;
-      tile.type = options.type || tile.type;
-      tile.behaviour = options.behaviour || null;
-    }
+    tile.commitId = 0;
+    tile.position = options.position || tile.position;
+    tile.type = options.type || tile.type;
+    tile.behaviour = options.behaviour || null;
     return tile;
   }
 
