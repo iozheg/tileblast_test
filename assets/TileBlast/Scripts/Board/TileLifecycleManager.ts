@@ -1,7 +1,9 @@
+import ParticleController from "../ParticleController";
 import TileControllerFactory from "../Services/TileControllerFactory";
 import TileController from "../Tile/TileController";
 import TileModel from "../Tile/TileModel";
 import TileType from "../TileType";
+import ObjectPool from "../utils/ObjectPool";
 import { Point } from "../utils/Point";
 
 const { ccclass, property } = cc._decorator;
@@ -18,6 +20,7 @@ export default class TileLifecycleManager extends cc.Component {
   private tileRemoveParticles: cc.Prefab = null;
 
   private tileControllersFactory: TileControllerFactory;
+  private removeParticlePool: ObjectPool;
 
   public setup(
     tileSize: number,
@@ -33,6 +36,8 @@ export default class TileLifecycleManager extends cc.Component {
       [...tileTypes, ...specialTileTypes],
       numColumns * numRows
     );
+
+    this.removeParticlePool = new ObjectPool(this.tileRemoveParticles);
   }
 
   public createTile(
@@ -48,9 +53,14 @@ export default class TileLifecycleManager extends cc.Component {
   }
 
   public async removeTile(tileController: TileController): Promise<void> {
-    const effect = cc.instantiate(this.tileRemoveParticles);
-    this.tileContainer.addChild(effect);
+    const effect = this.removeParticlePool.create(this.tileContainer);
     effect.setPosition(tileController.node.position);
+    const pc = effect.getComponent(ParticleController);
+    pc.launch();
+    pc.node.once("finished", () => {
+      this.removeParticlePool.release(effect);
+    });
+
     await tileController.destroyTile();
     this.tileControllersFactory.releaseInstance(tileController);
   }
