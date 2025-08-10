@@ -47,14 +47,15 @@ export default class ScoreProgressController extends ProgressControllerBase {
 
   onMovePerformed(): void {
     this.movesLeft--;
-    this.updateView();
+    this.updateMovesLabel();
   }
 
   onTilesRemoved(tileModels: TypedTile[]): void {
+    const prevValue = this.currentScore;
     this.currentScore += tileModels.filter(
       ({ behaviour }) => !behaviour
     ).length;
-    this.updateView();
+    this.updateScoreLabel(prevValue);
 
     this.checkState();
   }
@@ -76,7 +77,19 @@ export default class ScoreProgressController extends ProgressControllerBase {
     this.movesLabel.string = this.movesLeft.toString();
   }
 
-  private updateScoreLabel(): void {
-    this.scoreLabel.string = `${this.currentScore}/${this.scoreTarget}`;
+  private updateScoreLabel(startValue: number = 0): void {
+    cc.tween({ value: startValue })
+      .to(
+        0.2,
+        { value: this.currentScore },
+        {
+          onUpdate: (obj) => {
+            this.scoreLabel.string = `${Math.floor(obj.value)}/${
+              this.scoreTarget
+            }`;
+          },
+        }
+      )
+      .start();
   }
 }
