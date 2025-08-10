@@ -53,8 +53,8 @@ export default class BoardModel {
 
   public stageRemoving(tileModels: TileModel[], commitId: number): void {
     for (const model of tileModels) {
-      const index = this.grid.indexOf(model);
-      if (index !== -1 && model.commitId === 0) {
+      const index = this.getTileIndexAt(model.position.y, model.position.x);
+      if (this.grid[index] && model.commitId === 0) {
         this.grid[index].commitId = commitId;
       }
     }

@@ -12,7 +12,7 @@ export default class TileBehaviourService {
       const affected: TileModel[] = [];
       for (let col = 0; col < board.width; col++) {
         const t = board.getTileAt(tile.position.y, col);
-        if (t) affected.push(t);
+        if (t?.commitId === 0) affected.push(t);
       }
       return affected;
     },
@@ -20,7 +20,7 @@ export default class TileBehaviourService {
       const affected: TileModel[] = [];
       for (let row = 0; row < board.height; row++) {
         const t = board.getTileAt(row, tile.position.x);
-        if (t) affected.push(t);
+        if (t?.commitId === 0) affected.push(t);
       }
       return affected;
     },
@@ -35,13 +35,13 @@ export default class TileBehaviourService {
       for (let x = startX; x <= endX; x++) {
         for (let y = startY; y <= endY; y++) {
           const t = board.getTileAt(y, x);
-          if (t) affected.push(t);
+          if (t?.commitId === 0) affected.push(t);
         }
       }
       return affected;
     },
     [TileBehaviour.FieldDestroyer]: (tile: TileModel, board: BoardModel) => {
-      return [...board.tiles];
+      return board.tiles.filter((t) => t?.commitId === 0);
     },
   };
 

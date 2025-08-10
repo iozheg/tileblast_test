@@ -141,14 +141,28 @@ export default class BoardController extends cc.Component {
     );
 
     if (affectedTiles.length > 1) {
+      let specialTile: TileModel | null;
       if (effect.data.cause.behaviour) {
         this.checkChainReaction(affectedTiles, effect.data.cause);
       } else {
-        this.createSpecialTile(affectedTiles, effect.data.cause.position);
+        specialTile = this.createSpecialTile(
+          affectedTiles,
+          effect.data.cause.position
+        );
       }
 
       this.BoardModel.stageRemoving(affectedTiles, effect.commitId);
+      if (specialTile) {
+        this.BoardModel.setTileAt(specialTile.position, specialTile);
+        this.createTile(specialTile, specialTile.position);
+      }
       await this.animateRemoveTiles(effect, affectedTiles);
+
+      this.node.emit(
+        BoardControllerEvent.TILES_REMOVED,
+        affectedTiles,
+        effect.data.isUserAction
+      );
 
       await delay(100);
       this.BoardModel.commit(effect.commitId);
@@ -168,7 +182,10 @@ export default class BoardController extends cc.Component {
     });
   }
 
-  private createSpecialTile(tilesToRemove: TileModel[], causePosition: Point) {
+  private createSpecialTile(
+    tilesToRemove: TileModel[],
+    causePosition: Point
+  ): TileModel {
     const behaviour = this.behaviourService.getBehaviour(tilesToRemove);
     if (behaviour) {
       const specialTile = this.tileFactory.create({
@@ -176,9 +193,9 @@ export default class BoardController extends cc.Component {
         behaviour: behaviour,
         position: causePosition,
       });
-      this.BoardModel.setTileAt(specialTile.position, specialTile);
-      this.createTile(specialTile, causePosition);
+      return specialTile;
     }
+    return null;
   }
 
   private async animateRemoveTiles(
@@ -209,12 +226,6 @@ export default class BoardController extends cc.Component {
     }
 
     await Promise.all(animations);
-
-    this.node.emit(
-      BoardControllerEvent.TILES_REMOVED,
-      tileModels,
-      effect.data.isUserAction
-    );
   }
 
   private syncTiles(commitId: number): void {
