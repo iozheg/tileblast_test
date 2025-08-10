@@ -2,12 +2,12 @@ import BoardModel from "./BoardModel";
 import TileController from "../Tile/TileController";
 import TileModel from "../Tile/TileModel";
 import TileType from "../TileType";
-import ComponentPooledFactory from "../Services/TileControllerFactory";
 import { Point } from "../utils/Point";
 import TileFactory from "../Services/TileFactory";
 import TileBehaviourService from "../Services/TileBehaviourService";
 import { delay, getDistance } from "../utils/Utils";
 import EffectProcessor, { TileEffect } from "../utils/EffectProcessor";
+import TileLifecycleManager from "./TileLifecycleManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -29,9 +29,6 @@ export default class BoardController extends cc.Component {
   @property(cc.Node)
   tileContainer: cc.Node = null;
 
-  @property(cc.Prefab)
-  tilePrefab: cc.Prefab = null;
-
   @property
   private usedTileTypes = 4;
 
@@ -41,11 +38,12 @@ export default class BoardController extends cc.Component {
   @property([TileType])
   private specialTileTypes: TileType[] = [];
 
+  @property(TileLifecycleManager)
+  private tileLifecycleManager: TileLifecycleManager = null;
+
   private BoardModel: BoardModel;
 
   private tileFactory: TileFactory;
-
-  private tileControllersFactory: ComponentPooledFactory;
 
   private behaviourService: TileBehaviourService;
 
@@ -86,12 +84,12 @@ export default class BoardController extends cc.Component {
       this.numRows * tileSize
     );
 
-    this.tileControllersFactory = new ComponentPooledFactory(
-      this.tilePrefab,
-      this.tileContainer,
+    this.tileLifecycleManager.setup(
       tileSize,
-      [...this.tileTypes, ...this.specialTileTypes],
-      this.numColumns * this.numRows
+      this.tileTypes,
+      this.specialTileTypes,
+      this.numColumns,
+      this.numRows
     );
     this.createTiles();
 
@@ -110,11 +108,10 @@ export default class BoardController extends cc.Component {
     tileModel: TileModel,
     startPosition?: Point
   ): TileController {
-    const tileController = this.tileControllersFactory.getInstance(tileModel);
-    if (startPosition) {
-      tileController.setPosition(startPosition, true);
-    }
-
+    const tileController = this.tileLifecycleManager.createTile(
+      tileModel,
+      startPosition
+    );
     this.modelToController.set(tileModel, tileController);
 
     tileController.node.on(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
@@ -205,16 +202,14 @@ export default class BoardController extends cc.Component {
         const distance = effect.data.cause.behaviour
           ? getDistance(effect.data.cause.position, model.position)
           : 0;
-        const anim = delay(distance * this.baseDelay)
-          .then(() => tileController.destroyTile())
-          .then(() => {
-            tileController.node.off(
-              cc.Node.EventType.TOUCH_END,
-              this.onTileClick,
-              this
-            );
-            this.tileControllersFactory.releaseInstance(tileController);
-          });
+        const anim = delay(distance * this.baseDelay).then(async () => {
+          await this.tileLifecycleManager.removeTile(tileController);
+          tileController.node.off(
+            cc.Node.EventType.TOUCH_END,
+            this.onTileClick,
+            this
+          );
+        });
         animations.push(anim);
       }
       this.modelToController.delete(model);
@@ -252,7 +247,7 @@ export default class BoardController extends cc.Component {
     });
     this.modelToController.clear();
 
-    this.tileControllersFactory?.clearPool();
+    this.tileLifecycleManager.reset();
     this.tileFactory?.clearPool();
 
     this.spawnField = new Array(this.numColumns).fill(0);

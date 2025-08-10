@@ -20,7 +20,7 @@
         "__id__": 99
       },
       {
-        "__id__": 110
+        "__id__": 111
       }
     ],
     "_active": false,
@@ -506,7 +506,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "TiledContainer",
+    "_name": "TileContainer",
     "_objFlags": 0,
     "_parent": {
       "__id__": 9
@@ -3906,6 +3906,9 @@
     "_components": [
       {
         "__id__": 100
+      },
+      {
+        "__id__": 110
       }
     ],
     "_prefab": null,
@@ -3972,9 +3975,6 @@
     "tileContainer": {
       "__id__": 10
     },
-    "tilePrefab": {
-      "__uuid__": "7a93abfc-4eeb-4559-956e-7955d080d244"
-    },
     "usedTileTypes": 4,
     "tileTypes": [
       {
@@ -4007,6 +4007,9 @@
         "__id__": 109
       }
     ],
+    "tileLifecycleManager": {
+      "__id__": 110
+    },
     "_id": "eebui46FpG3pJW/7OjZj4D"
   },
   {
@@ -4073,6 +4076,25 @@
     }
   },
   {
+    "__type__": "70ce0jRQDJK/Zy1VLUldNiS",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 99
+    },
+    "_enabled": true,
+    "tileContainer": {
+      "__id__": 10
+    },
+    "tilePrefab": {
+      "__uuid__": "7a93abfc-4eeb-4559-956e-7955d080d244"
+    },
+    "tileRemoveParticles": {
+      "__uuid__": "79481fe6-d37e-4f93-8e00-6fe54a121f36"
+    },
+    "_id": "4ewFpzF8dEhKVq2M06ceY1"
+  },
+  {
     "__type__": "cc.Node",
     "_name": "GameController",
     "_objFlags": 0,
@@ -4083,7 +4105,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 111
+        "__id__": 112
       }
     ],
     "_prefab": null,
@@ -4139,7 +4161,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 110
+      "__id__": 111
     },
     "_enabled": true,
     "boardController": {
