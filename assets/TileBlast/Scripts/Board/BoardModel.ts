@@ -211,4 +211,40 @@ export default class BoardModel {
   private getRandomTileType(): string {
     return this.tileTypes[Math.floor(Math.random() * this.tileTypes.length)];
   }
+
+  public gridConsoleView(label: string, commitId: number): void {
+    let output = `%c[${label}]:\n`;
+    const styles: string[] = [`color: ${colorMap[commitId % 6]}`];
+    for (let row = 0; row < this.numRows; row++) {
+      let rowStr = "";
+      for (let col = 0; col < this.numColumns; col++) {
+        const tile = this.getTileAt(row, col);
+        let value: string;
+        let style = "";
+        if (tile && tile.behaviour) {
+          value = " S ";
+          style = `color: ${colorMap[tile.commitId % 6]}; font-weight: bold;`;
+        } else if (tile) {
+          value = ` ${tile.commitId}`.slice(-2).padStart(3, " ");
+          style = `color: ${colorMap[tile.commitId % 6]};`;
+        } else {
+          value = "   ";
+          style = "color: #fff;";
+        }
+        rowStr += `%c[${value}] `;
+        styles.push(style);
+      }
+      output += rowStr.trim() + "\n";
+    }
+    console.log(output, ...styles);
+  }
 }
+
+const colorMap: Record<number, string> = {
+  0: "white",
+  1: "green",
+  2: "blue",
+  3: "yellow",
+  4: "purple",
+  5: "orange",
+};

@@ -25,6 +25,11 @@ export default class GameController extends cc.Component {
 
   start() {
     this.boardController.node.on(
+      BoardControllerEvent.MOVE_PERFORMED,
+      this.onMovePerformed,
+      this
+    );
+    this.boardController.node.on(
       BoardControllerEvent.TILES_REMOVED,
       this.onTilesRemoved,
       this
@@ -73,8 +78,12 @@ export default class GameController extends cc.Component {
 
   // update (dt) {}
 
-  private onTilesRemoved(tileModels: TypedTile[], isUserAction: boolean): void {
-    this.gameProgress.onTilesRemoved(tileModels, isUserAction);
+  private onMovePerformed(): void {
+    this.gameProgress.onMovePerformed();
+  }
+
+  private onTilesRemoved(tileModels: TypedTile[]): void {
+    this.gameProgress.onTilesRemoved(tileModels);
   }
 
   private onGoalReached(): void {

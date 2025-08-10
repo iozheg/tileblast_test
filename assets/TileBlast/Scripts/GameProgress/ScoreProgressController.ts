@@ -45,9 +45,12 @@ export default class ScoreProgressController extends ProgressControllerBase {
   //   this.updateView();
   // }
 
-  onTilesRemoved(tileModels: TypedTile[], isUserAction: boolean): void {
-    isUserAction && this.movesLeft--;
+  onMovePerformed(): void {
+    this.movesLeft--;
+    this.updateView();
+  }
 
+  onTilesRemoved(tileModels: TypedTile[]): void {
     this.currentScore += tileModels.filter(
       ({ behaviour }) => !behaviour
     ).length;

@@ -13,7 +13,6 @@ const { ccclass, property } = cc._decorator;
 
 type EffectData = {
   cause: TileModel;
-  isUserAction: boolean;
 };
 
 @ccclass
@@ -130,7 +129,6 @@ export default class BoardController extends cc.Component {
 
     this.effectProcessor.addEffect(0, {
       cause: clickedTile,
-      isUserAction: true,
     });
   }
 
@@ -141,6 +139,8 @@ export default class BoardController extends cc.Component {
     );
 
     if (affectedTiles.length > 1) {
+      this.node.emit(BoardControllerEvent.MOVE_PERFORMED);
+
       let specialTile: TileModel | null;
       if (effect.data.cause.behaviour) {
         this.checkChainReaction(affectedTiles, effect.data.cause);
@@ -158,11 +158,7 @@ export default class BoardController extends cc.Component {
       }
       await this.animateRemoveTiles(effect, affectedTiles);
 
-      this.node.emit(
-        BoardControllerEvent.TILES_REMOVED,
-        affectedTiles,
-        effect.data.isUserAction
-      );
+      this.node.emit(BoardControllerEvent.TILES_REMOVED, affectedTiles);
 
       await delay(100);
       this.BoardModel.commit(effect.commitId);
@@ -176,7 +172,6 @@ export default class BoardController extends cc.Component {
         const distance = getDistance(causeTile.position, tile.position);
         this.effectProcessor.addEffect(distance * this.baseDelay, {
           cause: tile,
-          isUserAction: false,
         });
       }
     });
@@ -266,5 +261,6 @@ export default class BoardController extends cc.Component {
 }
 
 export enum BoardControllerEvent {
+  MOVE_PERFORMED = "move-performed",
   TILES_REMOVED = "tiles-removed",
 }
