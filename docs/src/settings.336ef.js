@@ -1,0 +1,1 @@
+window._CCSettings={platform:"web-mobile",groupList:["default"],collisionMatrix:[[true]],hasResourcesBundle:false,hasStartSceneBundle:false,remoteBundles:[],subpackages:[],launchScene:"db://assets/TileBlast/Scene/game.fire",orientation:"",jsList:[],bundleVers:{internal:"52d36",main:"15c77"}};
