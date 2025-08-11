@@ -1,4 +1,4 @@
-import ParticleController from "../ParticleController";
+import EffectControllerBase from "../Effects/EffectControllerBase";
 import { TileBehaviour } from "../Services/TileBehaviourService";
 import TileControllerFactory from "../Services/TileControllerFactory";
 import TileController from "../Tile/TileController";
@@ -82,9 +82,9 @@ export default class TileLifecycleManager extends cc.Component {
     const resolver = this.effectResolver(tileController.behaviour);
     const effect = resolver.create(this.tileContainer);
     effect.setPosition(tileController.node.position);
-    const pc = effect.getComponent(ParticleController);
-    pc.launch();
-    pc.node.once("finished", () => {
+    const effectController = effect.getComponent(EffectControllerBase);
+    effectController.playEffect();
+    effectController.node.once("finished", () => {
       resolver.release(effect);
     });
   }

@@ -1,10 +1,10 @@
-import ParticleController from "./ParticleController";
-import { delay } from "./utils/Utils";
+import EffectControllerBase from "./EffectControllerBase";
+import { delay } from "../utils/Utils";
 
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class TileRemoveAnimation extends ParticleController {
+export default class TileRemoveAnimation extends EffectControllerBase {
   @property(cc.SpriteFrame)
   circle: cc.SpriteFrame = null;
 
@@ -47,9 +47,7 @@ export default class TileRemoveAnimation extends ParticleController {
     }
   }
 
-  start() {}
-
-  public launch() {
+  public playEffect() {
     this.center.setScale(1, 1, 1);
     cc.tween(this.center).to(0.3, { scale: 0 }, { easing: "quadIn" }).start();
 

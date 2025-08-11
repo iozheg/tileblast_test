@@ -1,9 +1,10 @@
-import { delay } from "./utils/Utils";
+import EffectControllerBase from "./EffectControllerBase";
+import { delay } from "../utils/Utils";
 
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class ParticleController extends cc.Component {
+export default class ParticleController extends EffectControllerBase {
   private particleSystems: cc.ParticleSystem[] = [];
   private duration: number = 0;
 
@@ -14,7 +15,7 @@ export default class ParticleController extends cc.Component {
     }, 0);
   }
 
-  public launch() {
+  public playEffect() {
     this.particleSystems.forEach((system) => {
       system.resetSystem();
     });
