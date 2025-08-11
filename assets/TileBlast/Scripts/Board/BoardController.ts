@@ -79,9 +79,10 @@ export default class BoardController extends cc.Component {
       this.tileModelFactory
     );
 
+    const containerOffsets = this.tileContainer.getComponent(cc.Widget);
     this.board.setContentSize(
-      this.numColumns * tileSize,
-      this.numRows * tileSize
+      this.board.getContentSize().width,
+      this.numRows * tileSize + containerOffsets.top + containerOffsets.bottom
     );
 
     this.tileLifecycleManager.setup(

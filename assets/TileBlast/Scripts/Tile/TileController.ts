@@ -31,7 +31,7 @@ export default class TileController extends cc.Component {
   setPosition(position: Point, immediate: boolean = false): void {
     const scenePosition = {
       x: position.x * this.node.width + this.positionOffset.x,
-      y: -position.y * this.node.height,
+      y: -position.y * this.node.height - this.positionOffset.y,
     };
 
     if (immediate) {
