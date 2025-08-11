@@ -33,7 +33,6 @@ export default class TileRemoveAnimation extends ParticleController {
   private stars: cc.Node[] = [];
 
   onLoad() {
-    console.log("TileRemoveAnimation loaded");
     this.center = new cc.Node();
     this.center.addComponent(cc.Sprite).spriteFrame = this.circle;
     this.node.addChild(this.center);

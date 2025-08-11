@@ -157,9 +157,11 @@ export default class BoardController extends cc.Component {
 
       this.node.emit(BoardControllerEvent.TILES_REMOVED, affectedTiles);
 
-      await delay(100);
+      await delay(50);
       this.BoardModel.commit(effect.commitId);
       this.syncTiles(effect.commitId);
+    } else {
+      this.modelToController.get(effect.data.cause)?.rejectAction();
     }
   }
 

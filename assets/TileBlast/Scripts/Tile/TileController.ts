@@ -41,6 +41,10 @@ export default class TileController extends cc.Component {
     }
   }
 
+  rejectAction(): void {
+    this.tileView.shake();
+  }
+
   async destroyTile(): Promise<void> {
     await this.tileView.remove();
   }
