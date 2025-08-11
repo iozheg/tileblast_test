@@ -4090,7 +4090,10 @@
       "__uuid__": "7a93abfc-4eeb-4559-956e-7955d080d244"
     },
     "tileRemoveParticles": {
-      "__uuid__": "79481fe6-d37e-4f93-8e00-6fe54a121f36"
+      "__uuid__": "ea8d6277-22df-4e30-8610-21e1e167a9ff"
+    },
+    "bombParticles": {
+      "__uuid__": "bd155154-b3bb-4f0a-8d46-8e9a8886ba48"
     },
     "_id": "4ewFpzF8dEhKVq2M06ceY1"
   },

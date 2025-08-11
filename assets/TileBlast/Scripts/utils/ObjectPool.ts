@@ -11,7 +11,6 @@ export default class ObjectPool {
     let particle: cc.Node;
     if (this.pool.length > 0) {
       particle = this.pool.pop()!;
-      console.log("Particle reused from pool", this.pool.length);
     } else {
       particle = cc.instantiate(this.prefab);
     }
@@ -26,7 +25,6 @@ export default class ObjectPool {
     particle.removeFromParent();
     particle.active = false;
     this.pool.push(particle);
-    console.log("Particle released to pool", this.pool.length);
   }
 
   public clear(): void {

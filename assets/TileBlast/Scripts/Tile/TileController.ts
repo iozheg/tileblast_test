@@ -10,11 +10,13 @@ export default class TileController extends cc.Component {
   private tileView: TileView = null;
 
   tileId: string;
+  behaviour: string = null;
 
   private positionOffset: Point = { x: 0, y: 0 };
 
   setup(model: TileModel, sprite: cc.SpriteFrame): void {
     this.tileId = model.id;
+    this.behaviour = model.behaviour;
     this.tileView.setup(sprite);
   }
 
