@@ -5,6 +5,7 @@ import ProgressControllerBase, {
 } from "./GameProgress/ProgressControllerBase";
 
 import TypedTile from "./Tile/TypedTile";
+import { delay } from "./utils/Utils";
 
 const { ccclass, property } = cc._decorator;
 
@@ -19,9 +20,7 @@ export default class GameController extends cc.Component {
   @property(DialogController)
   dialogController: DialogController = null;
 
-  // LIFE-CYCLE CALLBACKS:
-
-  // onLoad () {}
+  private gameOverDelay = 1000;
 
   start() {
     this.boardController.node.on(
@@ -32,6 +31,11 @@ export default class GameController extends cc.Component {
     this.boardController.node.on(
       BoardControllerEvent.TILES_REMOVED,
       this.onTilesRemoved,
+      this
+    );
+    this.boardController.node.on(
+      BoardControllerEvent.NO_MOVES_LEFT,
+      this.onNoMovesLeft,
       this
     );
 
@@ -87,11 +91,15 @@ export default class GameController extends cc.Component {
   }
 
   private onGoalReached(): void {
-    this.dialogController.showSuccessDialog();
+    delay(this.gameOverDelay).then(() => {
+      this.dialogController.showSuccessDialog();
+    });
   }
 
   private onNoMovesLeft(): void {
-    this.dialogController.showFailureDialog();
+    delay(this.gameOverDelay).then(() => {
+      this.dialogController.showFailureDialog();
+    });
   }
 
   private retry() {

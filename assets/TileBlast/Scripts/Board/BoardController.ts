@@ -17,17 +17,20 @@ type EffectData = {
 
 @ccclass
 export default class BoardController extends cc.Component {
-  @property(cc.Integer)
-  private numColumns: number = 8;
-
-  @property(cc.Integer)
-  private numRows: number = 7;
-
   @property(cc.Node)
   board: cc.Node = null;
 
   @property(cc.Node)
   tileContainer: cc.Node = null;
+
+  @property(TileLifecycleManager)
+  private tileLifecycleManager: TileLifecycleManager = null;
+
+  @property(cc.Integer)
+  private numColumns: number = 8;
+
+  @property(cc.Integer)
+  private numRows: number = 7;
 
   @property
   private usedTileTypes = 4;
@@ -38,8 +41,8 @@ export default class BoardController extends cc.Component {
   @property([TileType])
   private specialTileTypes: TileType[] = [];
 
-  @property(TileLifecycleManager)
-  private tileLifecycleManager: TileLifecycleManager = null;
+  @property
+  private shuffleAttempts: number = 3;
 
   private BoardModel: BoardModel;
 
@@ -53,18 +56,21 @@ export default class BoardController extends cc.Component {
 
   private baseDelay = 50;
 
-  private effectProcessor: EffectProcessor<EffectData> = new EffectProcessor(
-    (effect) => this.handleEffect(effect),
-    () => {
-      this.spawnField.fill(0);
-    }
-  );
+  private effectProcessor: EffectProcessor<EffectData>;
 
   public init() {
     this.reset();
 
     this.tileModelFactory = new TileModelFactory();
     this.behaviourService = new TileBehaviourService();
+
+    this.effectProcessor = new EffectProcessor(
+      (effect) => this.handleEffect(effect),
+      () => {
+        this.spawnField.fill(0);
+        this.checkMoves();
+      }
+    );
 
     const tileSize =
       this.tileContainer.getContentSize().width / this.numColumns;
@@ -243,6 +249,30 @@ export default class BoardController extends cc.Component {
     };
   }
 
+  private async checkMoves(attempt = 1) {
+    if (attempt > this.shuffleAttempts) {
+      this.node.emit(BoardControllerEvent.NO_MOVES_LEFT);
+      return;
+    }
+    const groups: Record<string, number> = {};
+    let hasMoves = false;
+
+    for (const tile of this.BoardModel.tiles) {
+      groups[tile.group] = (groups[tile.group] || 0) + 1;
+      if (groups[tile.group] > 1 || tile.behaviour) {
+        hasMoves = true;
+        break;
+      }
+    }
+
+    if (!hasMoves) {
+      await delay(700);
+      this.BoardModel.shuffleTiles();
+      this.syncTiles(-1);
+      this.checkMoves(attempt + 1);
+    }
+  }
+
   private reset() {
     this.modelToController.forEach((controller) => {
       controller.node.off(cc.Node.EventType.TOUCH_END, this.onTileClick, this);
@@ -261,4 +291,5 @@ export default class BoardController extends cc.Component {
 export enum BoardControllerEvent {
   MOVE_PERFORMED = "move-performed",
   TILES_REMOVED = "tiles-removed",
+  NO_MOVES_LEFT = "no-moves-left",
 }

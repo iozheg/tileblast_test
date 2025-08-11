@@ -4012,7 +4012,7 @@
         "__id__": 102
       },
       {
-        "__id__": 112
+        "__id__": 103
       }
     ],
     "_prefab": null,
@@ -4071,19 +4071,19 @@
       "__id__": 101
     },
     "_enabled": true,
-    "numColumns": 9,
-    "numRows": 10,
     "board": {
       "__id__": 8
     },
     "tileContainer": {
       "__id__": 13
     },
+    "tileLifecycleManager": {
+      "__id__": 103
+    },
+    "numColumns": 9,
+    "numRows": 10,
     "usedTileTypes": 5,
     "tileTypes": [
-      {
-        "__id__": 103
-      },
       {
         "__id__": 104
       },
@@ -4095,12 +4095,12 @@
       },
       {
         "__id__": 107
+      },
+      {
+        "__id__": 108
       }
     ],
     "specialTileTypes": [
-      {
-        "__id__": 108
-      },
       {
         "__id__": 109
       },
@@ -4109,12 +4109,35 @@
       },
       {
         "__id__": 111
+      },
+      {
+        "__id__": 112
       }
     ],
-    "tileLifecycleManager": {
-      "__id__": 112
-    },
+    "shuffleAttempts": 3,
     "_id": "eebui46FpG3pJW/7OjZj4D"
+  },
+  {
+    "__type__": "70ce0jRQDJK/Zy1VLUldNiS",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 101
+    },
+    "_enabled": true,
+    "tileContainer": {
+      "__id__": 13
+    },
+    "tilePrefab": {
+      "__uuid__": "7a93abfc-4eeb-4559-956e-7955d080d244"
+    },
+    "tileRemoveParticles": {
+      "__uuid__": "ea8d6277-22df-4e30-8610-21e1e167a9ff"
+    },
+    "bombParticles": {
+      "__uuid__": "bd155154-b3bb-4f0a-8d46-8e9a8886ba48"
+    },
+    "_id": "4ewFpzF8dEhKVq2M06ceY1"
   },
   {
     "__type__": "TileType",
@@ -4178,28 +4201,6 @@
     "sprite": {
       "__uuid__": "c24082be-1138-49f1-885a-4e771de1193d"
     }
-  },
-  {
-    "__type__": "70ce0jRQDJK/Zy1VLUldNiS",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 101
-    },
-    "_enabled": true,
-    "tileContainer": {
-      "__id__": 13
-    },
-    "tilePrefab": {
-      "__uuid__": "7a93abfc-4eeb-4559-956e-7955d080d244"
-    },
-    "tileRemoveParticles": {
-      "__uuid__": "ea8d6277-22df-4e30-8610-21e1e167a9ff"
-    },
-    "bombParticles": {
-      "__uuid__": "bd155154-b3bb-4f0a-8d46-8e9a8886ba48"
-    },
-    "_id": "4ewFpzF8dEhKVq2M06ceY1"
   },
   {
     "__type__": "cc.Node",

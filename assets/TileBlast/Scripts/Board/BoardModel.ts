@@ -62,8 +62,19 @@ export default class BoardModel {
 
   public commit(commitId: number): void {
     this.performRemove(commitId);
-    this.updateTilesPosition();
+    this.shiftTilesDown();
     this.fillEmptyTiles(commitId);
+    this.assignGroups();
+  }
+
+  public shuffleTiles(): void {
+    this.grid = this.grid.sort(() => Math.random() - 0.5);
+    this.grid.forEach((tile, index) => {
+      tile.position = {
+        x: index % this.numColumns,
+        y: Math.floor(index / this.numColumns),
+      };
+    });
     this.assignGroups();
   }
 
@@ -95,7 +106,7 @@ export default class BoardModel {
     this.assignGroups();
   }
 
-  private updateTilesPosition(): void {
+  private shiftTilesDown(): void {
     for (let i = this.grid.length - 1; i >= 0; i--) {
       if (!this.grid[i]) {
         const position = {
