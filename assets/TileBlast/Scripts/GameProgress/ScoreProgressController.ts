@@ -52,9 +52,11 @@ export default class ScoreProgressController extends ProgressControllerBase {
 
   onTilesRemoved(tileModels: TypedTile[]): void {
     const prevValue = this.currentScore;
-    this.currentScore += tileModels.filter(
-      ({ behaviour }) => !behaviour
-    ).length;
+    const gainedScore = tileModels.filter(({ behaviour }) => !behaviour).length;
+    this.currentScore = Math.min(
+      this.currentScore + gainedScore,
+      this.scoreTarget
+    );
     this.updateScoreLabel(prevValue);
 
     this.checkState();
