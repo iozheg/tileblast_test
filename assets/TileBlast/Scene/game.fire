@@ -194,8 +194,8 @@
         0,
         0,
         1,
-        1,
-        1,
+        1.4,
+        1.4,
         1
       ]
     },
@@ -251,14 +251,14 @@
     "node": {
       "__id__": 3
     },
-    "_enabled": false,
+    "_enabled": true,
     "alignMode": 1,
     "_target": null,
-    "_alignFlags": 21,
+    "_alignFlags": 16,
     "_left": 0,
     "_right": 0,
-    "_top": 0,
-    "_bottom": 0,
+    "_top": 280,
+    "_bottom": 280,
     "_verticalCenter": 0,
     "_horizontalCenter": 0,
     "_isAbsLeft": true,
@@ -774,10 +774,10 @@
     "node": {
       "__id__": 8
     },
-    "_enabled": false,
+    "_enabled": true,
     "alignMode": 1,
     "_target": null,
-    "_alignFlags": 0,
+    "_alignFlags": 40,
     "_left": 10,
     "_right": 10,
     "_top": 640,
@@ -4081,7 +4081,7 @@
       "__id__": 103
     },
     "numColumns": 9,
-    "numRows": 10,
+    "numRows": 9,
     "usedTileTypes": 5,
     "tileTypes": [
       {
